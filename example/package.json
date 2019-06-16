@@ -5,16 +5,21 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "immutable": "link:../node_modules/immutable",
     "prop-types": "^15.6.2",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "react-scripts": "^1.1.4",
-    "react-oauth2-popout": "link:.."
+    "react": "link:../node_modules/react",
+    "react-dom": "link:../node_modules/react-dom",
+    "react-oauth2-popout": "link:..",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "^1.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "jsdoc-to-markdown": "^5.0.0"
   }
 }
