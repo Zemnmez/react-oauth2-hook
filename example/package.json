@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "fast-levenshtein": "^2.0.6",
     "immutable": "link:../node_modules/immutable",
     "prop-types": "^15.6.2",
     "react": "link:../node_modules/react",
