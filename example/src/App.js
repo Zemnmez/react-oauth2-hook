@@ -32,12 +32,15 @@ const SavedTracks = () => {
     redirectUri: document.location.href+"/callback"
   })
 
-  const [savedTracks, setSavedTracks] = React.useState()
+  const [savedTracks, setSavedTracks] = React.useState([])
   const [error, setError] = React.useState()
 
   // when we get a token, query Spotify
-  React.useEffect(() => {token != undefined && fetch(
-    'https://api.spotify.com/v1/me/tracks', {
+  React.useEffect(() => {
+    if (token === undefined) return;
+    let tracks = []
+    setSavedTracks([])
+    const getTracks = (url) => fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -49,18 +52,21 @@ const SavedTracks = () => {
         return data;
       }
     ).then(
-      data => setSavedTracks(data)
+      data => {
+        tracks = tracks.concat(data.items)
+        setSavedTracks(tracks)
+        if (data.next) getTracks(data.next);
+      }
     ).catch(
       error => setError(error)
-    )
+    );
+
+    getTracks('https://api.spotify.com/v1/me/tracks?limit=50')
   }, [token] )
 
-  if (!token || error || !savedTracks) return <div onClick={getToken}>login with Spotify</div>
-    if (error) return <div>
-      Error: {error}
-    </div>
-
   return <div>
+    {!(token || error || !savedTracks) && <div onClick={getToken}>login with Spotify</div>}
+    {error && <div> Error {error.message} </div>}
     You might like to try these songs on Twitch Sings:
     <TwitchSingsSongs {...{
       spotifyTracks: savedTracks
@@ -70,7 +76,7 @@ const SavedTracks = () => {
 
 const TwitchSingsSongs = ({ spotifyTracks }) => {
   console.log(spotifyTracks)
-  const artists = [...spotifyTracks.items.reduce(
+  const artists = [...spotifyTracks.reduce(
     (set, {track: { artists }}) => {
       artists.forEach(({ name }) => set.add(name))
       return set
