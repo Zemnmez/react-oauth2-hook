@@ -20,7 +20,7 @@
     "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
     "deploy": "gh-pages -d example/build",
-    "readmegen": "cp readme-pre.md README.md; yarn run jsdoc2md src/*.js >> README.md"
+    "readmegen": "cp readme-pre.md README.md; npx jsdoc2md src/*.js >> README.md"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",

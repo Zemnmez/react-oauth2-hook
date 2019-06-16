@@ -2,6 +2,8 @@
 
 > Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
 
+Check out the demo [on github](https://zemnmez.github.io/react-oauth2-hook)!
+
 [![NPM](https://img.shields.io/npm/v/react-oauth2-hook.svg)](https://www.npmjs.com/package/react-oauth2-hook) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 ## Install
@@ -10,8 +12,6 @@
 yarn add react-oauth2-hook
 ```
 
-
-$ /Users/tshadwel/Documents/devel/react-oauth2-popout/node_modules/.bin/jsdoc2md src/index.js src/test.js
 ## Constants
 
 <dl>
@@ -81,8 +81,8 @@ Finally, in advanced cases the user can manually overwrite any
 stored token by capturing and calling the third item in
 the reponse array with the new value.
 
-**Kind**: global constant  
-**Example**  
+**Kind**: global constant
+**Example**
 ```js
 const SpotifyTracks = () => {
  const [token, getToken] = useOAuth2Token({
@@ -98,7 +98,7 @@ const SpotifyTracks = () => {
  // when we get a token, query spotify
  React.useEffect(() => {
      if (token == undefined) {return}
-     fetch('https://api.spotify.com/v1/me/tracks", {
+     fetch('https://api.spotify.com/v1/me/tracks', {
          headers: {
              Authorization: `Bearer ${token}`
          }
@@ -131,8 +131,8 @@ By default, this component will deal with errors by closing the window,
 via its own React error boundary. Pass `{ errorBoundary: false }`
 to handle this functionality yourself.
 
-**Kind**: global constant  
-**Example**  
+**Kind**: global constant
+**Example**
 ```js
 <Route exact path="/callback" component={OAuthCallback} />} />
 ```

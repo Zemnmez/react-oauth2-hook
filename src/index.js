@@ -50,7 +50,7 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  *  // when we get a token, query spotify
  *  React.useEffect(() => {
  *      if (token == undefined) {return}
- *      fetch('https://api.spotify.com/v1/me/tracks", {
+ *      fetch('https://api.spotify.com/v1/me/tracks', {
  *          headers: {
  *              Authorization: `Bearer ${token}`
  *          }
