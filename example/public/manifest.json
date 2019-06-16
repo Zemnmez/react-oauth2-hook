@@ -1,6 +1,6 @@
 {
-  "short_name": "react-oauth2-popout",
-  "name": "react-oauth2-popout",
+  "short_name": "react-oauth2-hook",
+  "name": "react-oauth2-hook",
   "start_url": "./index.html",
   "display": "standalone",
   "theme_color": "#000000",

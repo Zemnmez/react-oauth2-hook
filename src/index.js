@@ -3,7 +3,7 @@ import { useStorage } from 'react-storage-hook'
 import { Map } from 'immutable'
 import PropTypes from 'prop-types'
 
-const storagePrefix = 'react-oauth2-popout'
+const storagePrefix = 'react-oauth2-hook'
 const oauthStateName = storagePrefix + '-state-token-challenge'
 
 /**

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Switch, Route, BrowserRouter } from 'react-router-dom'
 
-import { useOAuth2Token, OAuthCallback }  from 'react-oauth2-popout'
+import { useOAuth2Token, OAuthCallback }  from 'react-oauth2-hook'
 
 export default class App extends React.Component {
   render () {
