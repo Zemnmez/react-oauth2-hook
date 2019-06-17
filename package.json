@@ -15,12 +15,12 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "rollup -c",
+    "build": "rollup -c && make readme.md",
     "start": "rollup -c -w",
     "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
     "deploy": "gh-pages -d example/build",
-    "readmegen": "cp readme-pre.md README.md; npx jsdoc2md src/*.js >> README.md"
+    "readmegen": "make README.md"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",
