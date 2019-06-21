@@ -1,139 +1,147 @@
-
 # react-oauth2-hook
 
 > Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
 
-Licence: MIT
+[![NPM](https://img.shields.io/npm/v/react-oauth2-hook.svg)](https://www.npmjs.com/package/react-oauth2-hook)
 
-[![NPM](https://img.shields.io/npm/v/react-oauth2-hook.svg)](https://www.npmjs.com/package/react-oauth2-hook) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+| | |
+|----|----|
+| licence | MIT |
+| version | 1.0.3 |
+| requires | [prop-types](//npmjs.com/package/prop-types) [react](//npmjs.com/package/react) [react-dom](//npmjs.com/package/react-dom) [react-storage-hook](//npmjs.com/package/react-storage-hook) |
+| | |
 
-## Install
-
+# Install
 ```bash
 yarn add react-oauth2-hook
 ```
+# Example
+```javascript
+import React from 'react'
+import { Switch, Route, BrowserRouter } from 'react-router-dom'
+import levenshtein from 'fast-levenshtein'
+import twitchSingsSongs from './TwitchSings_SongList.json'
+import { Map } from 'immutable'
 
-## Constants
+import { useOAuth2Token, OAuthCallback }  from 'react-oauth2-hook'
 
-<dl>
-<dt><a href="#useOAuth2Token">useOAuth2Token</a></dt>
-<dd><p>useOAuth2Token is a React hook providing an OAuth2 implicit grant token.</p>
-<p>When useToken is called, it will attempt to retrieve an existing
-token by the criteria of <code>{ authorizeUrl, scopes, clientID }</code>.
-If a token by these specifications does not exist, the first
-item in the returned array will be <code>undefined</code>.</p>
-<p>If the user wishes to retrieve a new token, they can call <code>getToken()</code>,
-a function returned by the second parameter. When called, the function
-will open a window for the user to confirm the OAuth grant, and
-pass it back as expected via the hook.</p>
-<p>The OAuth token must be passed to a static endpoint. As
-such, the <code>callbackUrl</code> must be passed with this endpoint.
-The <code>callbackUrl</code> should render the <code>Callback</code> component,
-which will securely verify the token and pass it back,
-before closing the window.</p>
-<p>All instances of this hook requesting the same token and scopes
-from the same place are synchronised. In concrete terms,
-if you have many components waiting for a Facebook OAuth token
-to make a call, they will all immediately update when any component
-gets a token.</p>
-<p>Finally, in advanced cases the user can manually overwrite any
-stored token by capturing and calling the third item in
-the reponse array with the new value.</p>
-</dd>
-<dt><a href="#OAuthCallback">OAuthCallback</a></dt>
-<dd><p>OAuthCallback is a React component that handles the callback
-step of the OAuth2 protocol.</p>
-<p>OAuth2Callback is expected to be rendered on the url corresponding
-to your redirect_uri.</p>
-<p>By default, this component will deal with errors by closing the window,
-via its own React error boundary. Pass <code>{ errorBoundary: false }</code>
-to handle this functionality yourself.</p>
-</dd>
-</dl>
+export default class App extends React.Component {
+  render () {
+    return (
+      <div>
+        <BrowserRouter>
+        <Switch>
+          <Route path={"//callback"} component={OAuthCallback}/>
+          <Route path={"/callback"} component={OAuthCallback}/>
+          <Route path={"react-oauth2-hook/callback"} component={OAuthCallback}/>
+          <Route path={"react-oauth2-hook//callback"} component={OAuthCallback}/>
+          <Route component={SavedTracks} />
+        </Switch>
+        </BrowserRouter>
+      </div>
+    )
+  }
+}
 
-<a name="useOAuth2Token"></a>
+const SavedTracks = () => {
+  const [token, getToken] = useOAuth2Token({
+    authorizeUrl: "https://accounts.spotify.com/authorize",
+    scope: ["user-library-read"],
+    clientID: "bd9844d654f242f782509461bdba068c",
+    redirectUri: document.location.href+"/callback"
+  })
 
-## useOAuth2Token
-useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
+  const [savedTracks, setSavedTracks] = React.useState([])
+  const [error, setError] = React.useState()
 
-When useToken is called, it will attempt to retrieve an existing
-token by the criteria of `{ authorizeUrl, scopes, clientID }`.
-If a token by these specifications does not exist, the first
-item in the returned array will be `undefined`.
+  // when we get a token, query Spotify
+  React.useEffect(() => {
+    if (token === undefined) return;
+    let tracks = []
+    setSavedTracks([])
+    const getTracks = (url) => fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(
+      response => response.json()
+    ).then(
+      data => {
+        if(data.error) throw data.error;
+        return data;
+      }
+    ).then(
+      data => {
+        tracks = tracks.concat(data.items)
+        setSavedTracks(tracks)
+        if (data.next) getTracks(data.next);
+      }
+    ).catch(
+      error => setError(error)
+    );
 
-If the user wishes to retrieve a new token, they can call `getToken()`,
-a function returned by the second parameter. When called, the function
-will open a window for the user to confirm the OAuth grant, and
-pass it back as expected via the hook.
+    getTracks('https://api.spotify.com/v1/me/tracks?limit=50')
+  }, [token] )
 
-The OAuth token must be passed to a static endpoint. As
-such, the `callbackUrl` must be passed with this endpoint.
-The `callbackUrl` should render the `Callback` component,
-which will securely verify the token and pass it back,
-before closing the window.
+  return <div>
+    {!(token || error || !savedTracks) && <div onClick={getToken}>login with Spotify</div>}
+    {error && <div> Error {error.message} </div>}
+    You might like to try these songs on Twitch Sings:
+    <TwitchSingsSongs {...{
+      spotifyTracks: savedTracks
+    }}/>
+  </div>
+}
 
-All instances of this hook requesting the same token and scopes
-from the same place are synchronised. In concrete terms,
-if you have many components waiting for a Facebook OAuth token
-to make a call, they will all immediately update when any component
-gets a token.
+const TwitchSingsSongs = ({ spotifyTracks }) => {
+  console.log(spotifyTracks)
+  const artists = [...spotifyTracks.reduce(
+    (set, {track: { artists }}) => {
+      artists.forEach(({ name }) => set.add(name))
+      return set
+    }, new Set())];
 
-Finally, in advanced cases the user can manually overwrite any
-stored token by capturing and calling the third item in
-the reponse array with the new value.
+  console.log(artists)
 
-**Kind**: global constant  
-**Example**  
-```js
-const SpotifyTracks = () => {
- const [token, getToken] = useOAuth2Token({
-     authorizeUrl: "https://accounts.spotify.com/authorize",
-     scope: ["user-library-read"],
-     clientID: "abcdefg",
-     redirectUri: document.location.origin + "/callback"
- })
+  const songs = twitchSingsSongs.songs.filter(
+    ({ made_famous_by }) => artists.some(
+      artist => levenshtein.get(made_famous_by.toLowerCase(), artist.toLowerCase()) < 4
+    )
+  )
 
- const [response, setResponse] = React.useState()
- const [error, setError] = React.useState()
-
- // when we get a token, query spotify
- React.useEffect(() => {
-     if (token == undefined) {return}
-     fetch('https://api.spotify.com/v1/me/tracks', {
-         headers: {
-             Authorization: `Bearer ${token}`
-         }
-     }).then(
-         json => response.json()
-     ).then(
-         data => setResponse(data)
-     ).catch(
-         error => setError(error)
-     )
- }, [token])
-
- if (!token || error) return <div onClick={getToken}> login with Spotify </div>
-
-return <div>
- Your saved tracks on Spotify: {JSON.stringify(response)}
-</div>
+  return <table>
+  <thead>
+    <tr>{
+      ["title", "made famous by"].map(v => <td key={v}>{v}</td>)
+    }</tr>
+  </thead>
+  <tbody>
+  {songs.map(
+    ({title, made_famous_by: artist }, i) => <tr key={i}>
+      <td>{title}</td>
+      <td>{artist}</td>
+    </tr>
+  )}
+  </tbody>
+  </table>
 }
 ```
-<a name="OAuthCallback"></a>
 
-## OAuthCallback
-OAuthCallback is a React component that handles the callback
-step of the OAuth2 protocol.
+# Security
+Security is particularly vital for the OAuth protocol, as it involves several potentially risky steps and controls user identity.
 
-OAuth2Callback is expected to be rendered on the url corresponding
-to your redirect_uri.
+## State
+In OAuth, the state token is provided to the authorizing server (e.g. Facebook), and passed back to the client with all responses.
+This is to validate the user that fulfills the callback is the one that initiated the authorization process. Otherwise, an attacker
+can send their callback URL to a victim to cause the victim to be logged into the attacker account.
 
-By default, this component will deal with errors by closing the window,
-via its own React error boundary. Pass `{ errorBoundary: false }`
-to handle this functionality yourself.
+Here, we use webcrypto to generate random bytes, store them in `localStorage`, and verify the same bytes are returned to us.
+The bytes are concatenated with an identifer of the authorization including the authorize endpoint and clientID. In this way,
 
-**Kind**: global constant  
-**Example**  
-```js
-<Route exact path="/callback" component={OAuthCallback} />} />
-```
+
+
+## Reference
+- Exports
+ - [useOAuth2Token({authorizeUrl}, {scope}, {redirectUri}, {clientID})](#useOAuth2Token)
+
+

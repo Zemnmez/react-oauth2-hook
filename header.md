@@ -13,3 +13,6 @@ Licence: MIT
 yarn add react-oauth2-hook
 ```
 
+## Security
+
+## API Reference

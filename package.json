@@ -15,12 +15,11 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "rollup -c && make readme.md",
+    "make": "make -j",
+    "build": "yarn make dist src/doc.js README.md",
     "start": "rollup -c -w",
-    "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
-    "deploy": "gh-pages -d example/build",
-    "readmegen": "make README.md"
+    "deploy": "gh-pages -d example/build"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",
@@ -30,6 +29,7 @@
   },
   "devDependencies": {
     "@svgr/rollup": "^2.4.1",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.5",
     "babel-plugin-external-helpers": "^6.22.0",
@@ -46,6 +46,8 @@
     "eslint-plugin-react": "^7.10.0",
     "eslint-plugin-standard": "^3.1.0",
     "gh-pages": "^1.2.0",
+    "jsdoc": "^3.6.2",
+    "jsdoc-to-markdown": "^5.0.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-scripts": "^1.1.4",
@@ -60,5 +62,6 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {}
 }

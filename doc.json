@@ -1,0 +1,1338 @@
+[
+    {
+        "comment": "/**\n * @module react-oauth2-hook\n * @requires prop-types\n * @requires react\n * @requires react-dom\n * @requires react-storage-hook\n * @summary Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.\n * @version 1.0.3\n * @license MIT\n * @author zemnmez\n * @copyright zemnmez 2019\n * @description\n * # Security\n * Security is particularly vital for the OAuth protocol, as it involves several potentially risky steps and controls user identity.\n * \n * ## State\n * In OAuth, the state token is provided to the authorizing server (e.g. Facebook), and passed back to the client with all responses.\n * This is to validate the user that fulfills the callback is the one that initiated the authorization process. Otherwise, an attacker\n * can send their callback URL to a victim to cause the victim to be logged into the attacker account.\n * \n * Here, we use webcrypto to generate random bytes, store them in `localStorage`, and verify the same bytes are returned to us.\n * The bytes are concatenated with an identifer of the authorization including the authorize endpoint and clientID. In this way,\n * @example\n * import React from 'react'\n * import { Switch, Route, BrowserRouter } from 'react-router-dom'\n * import levenshtein from 'fast-levenshtein'\n * import twitchSingsSongs from './TwitchSings_SongList.json'\n * import { Map } from 'immutable'\n * \n * import { useOAuth2Token, OAuthCallback }  from 'react-oauth2-hook'\n * \n * export default class App extends React.Component {\n *   render () {\n *     return (\n *       <div>\n *         <BrowserRouter>\n *         <Switch>\n *           <Route path={\"//callback\"} component={OAuthCallback}/>\n *           <Route path={\"/callback\"} component={OAuthCallback}/>\n *           <Route path={\"react-oauth2-hook/callback\"} component={OAuthCallback}/>\n *           <Route path={\"react-oauth2-hook//callback\"} component={OAuthCallback}/>\n *           <Route component={SavedTracks} />\n *         </Switch>\n *         </BrowserRouter>\n *       </div>\n *     )\n *   }\n * }\n * \n * const SavedTracks = () => {\n *   const [token, getToken] = useOAuth2Token({\n *     authorizeUrl: \"https://accounts.spotify.com/authorize\",\n *     scope: [\"user-library-read\"],\n *     clientID: \"bd9844d654f242f782509461bdba068c\",\n *     redirectUri: document.location.href+\"/callback\"\n *   })\n * \n *   const [savedTracks, setSavedTracks] = React.useState([])\n *   const [error, setError] = React.useState()\n * \n *   // when we get a token, query Spotify\n *   React.useEffect(() => {\n *     if (token === undefined) return;\n *     let tracks = []\n *     setSavedTracks([])\n *     const getTracks = (url) => fetch(url, {\n *       headers: {\n *         Authorization: `Bearer ${token}`\n *       }\n *     }).then(\n *       response => response.json()\n *     ).then(\n *       data => {\n *         if(data.error) throw data.error;\n *         return data;\n *       }\n *     ).then(\n *       data => {\n *         tracks = tracks.concat(data.items)\n *         setSavedTracks(tracks)\n *         if (data.next) getTracks(data.next);\n *       }\n *     ).catch(\n *       error => setError(error)\n *     );\n * \n *     getTracks('https://api.spotify.com/v1/me/tracks?limit=50')\n *   }, [token] )\n * \n *   return <div>\n *     {!(token || error || !savedTracks) && <div onClick={getToken}>login with Spotify</div>}\n *     {error && <div> Error {error.message} </div>}\n *     You might like to try these songs on Twitch Sings:\n *     <TwitchSingsSongs {...{\n *       spotifyTracks: savedTracks\n *     }}/>\n *   </div>\n * }\n * \n * const TwitchSingsSongs = ({ spotifyTracks }) => {\n *   console.log(spotifyTracks)\n *   const artists = [...spotifyTracks.reduce(\n *     (set, {track: { artists }}) => {\n *       artists.forEach(({ name }) => set.add(name))\n *       return set\n *     }, new Set())];\n * \n *   console.log(artists)\n * \n *   const songs = twitchSingsSongs.songs.filter(\n *     ({ made_famous_by }) => artists.some(\n *       artist => levenshtein.get(made_famous_by.toLowerCase(), artist.toLowerCase()) < 4\n *     )\n *   )\n * \n *   return <table>\n *   <thead>\n *     <tr>{\n *       [\"title\", \"made famous by\"].map(v => <td key={v}>{v}</td>)\n *     }</tr>\n *   </thead>\n *   <tbody>\n *   {songs.map(\n *     ({title, made_famous_by: artist }, i) => <tr key={i}>\n *       <td>{title}</td>\n *       <td>{artist}</td>\n *     </tr>\n *   )}\n *   </tbody>\n *   </table>\n * }\n * @copyright zemnmez 2019\n * @license MIT\n */",
+        "meta": {
+            "filename": "doc.js",
+            "lineno": 1,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {}
+        },
+        "kind": "module",
+        "name": "react-oauth2-hook",
+        "requires": [
+            "module:prop-types",
+            "module:react",
+            "module:react-dom",
+            "module:react-storage-hook"
+        ],
+        "summary": "Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.",
+        "version": "1.0.3",
+        "license": "MIT",
+        "author": [
+            "zemnmez"
+        ],
+        "copyright": "zemnmez 2019",
+        "description": "# Security\nSecurity is particularly vital for the OAuth protocol, as it involves several potentially risky steps and controls user identity.\n\n## State\nIn OAuth, the state token is provided to the authorizing server (e.g. Facebook), and passed back to the client with all responses.\nThis is to validate the user that fulfills the callback is the one that initiated the authorization process. Otherwise, an attacker\ncan send their callback URL to a victim to cause the victim to be logged into the attacker account.\n\nHere, we use webcrypto to generate random bytes, store them in `localStorage`, and verify the same bytes are returned to us.\nThe bytes are concatenated with an identifer of the authorization including the authorize endpoint and clientID. In this way,",
+        "examples": [
+            "import React from 'react'\nimport { Switch, Route, BrowserRouter } from 'react-router-dom'\nimport levenshtein from 'fast-levenshtein'\nimport twitchSingsSongs from './TwitchSings_SongList.json'\nimport { Map } from 'immutable'\n\nimport { useOAuth2Token, OAuthCallback }  from 'react-oauth2-hook'\n\nexport default class App extends React.Component {\n  render () {\n    return (\n      <div>\n        <BrowserRouter>\n        <Switch>\n          <Route path={\"//callback\"} component={OAuthCallback}/>\n          <Route path={\"/callback\"} component={OAuthCallback}/>\n          <Route path={\"react-oauth2-hook/callback\"} component={OAuthCallback}/>\n          <Route path={\"react-oauth2-hook//callback\"} component={OAuthCallback}/>\n          <Route component={SavedTracks} />\n        </Switch>\n        </BrowserRouter>\n      </div>\n    )\n  }\n}\n\nconst SavedTracks = () => {\n  const [token, getToken] = useOAuth2Token({\n    authorizeUrl: \"https://accounts.spotify.com/authorize\",\n    scope: [\"user-library-read\"],\n    clientID: \"bd9844d654f242f782509461bdba068c\",\n    redirectUri: document.location.href+\"/callback\"\n  })\n\n  const [savedTracks, setSavedTracks] = React.useState([])\n  const [error, setError] = React.useState()\n\n  // when we get a token, query Spotify\n  React.useEffect(() => {\n    if (token === undefined) return;\n    let tracks = []\n    setSavedTracks([])\n    const getTracks = (url) => fetch(url, {\n      headers: {\n        Authorization: `Bearer ${token}`\n      }\n    }).then(\n      response => response.json()\n    ).then(\n      data => {\n        if(data.error) throw data.error;\n        return data;\n      }\n    ).then(\n      data => {\n        tracks = tracks.concat(data.items)\n        setSavedTracks(tracks)\n        if (data.next) getTracks(data.next);\n      }\n    ).catch(\n      error => setError(error)\n    );\n\n    getTracks('https://api.spotify.com/v1/me/tracks?limit=50')\n  }, [token] )\n\n  return <div>\n    {!(token || error || !savedTracks) && <div onClick={getToken}>login with Spotify</div>}\n    {error && <div> Error {error.message} </div>}\n    You might like to try these songs on Twitch Sings:\n    <TwitchSingsSongs {...{\n      spotifyTracks: savedTracks\n    }}/>\n  </div>\n}\n\nconst TwitchSingsSongs = ({ spotifyTracks }) => {\n  console.log(spotifyTracks)\n  const artists = [...spotifyTracks.reduce(\n    (set, {track: { artists }}) => {\n      artists.forEach(({ name }) => set.add(name))\n      return set\n    }, new Set())];\n\n  console.log(artists)\n\n  const songs = twitchSingsSongs.songs.filter(\n    ({ made_famous_by }) => artists.some(\n      artist => levenshtein.get(made_famous_by.toLowerCase(), artist.toLowerCase()) < 4\n    )\n  )\n\n  return <table>\n  <thead>\n    <tr>{\n      [\"title\", \"made famous by\"].map(v => <td key={v}>{v}</td>)\n    }</tr>\n  </thead>\n  <tbody>\n  {songs.map(\n    ({title, made_famous_by: artist }, i) => <tr key={i}>\n      <td>{title}</td>\n      <td>{artist}</td>\n    </tr>\n  )}\n  </tbody>\n  </table>\n}"
+        ],
+        "longname": "module:react-oauth2-hook"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                147,
+                182
+            ],
+            "filename": "index.js",
+            "lineno": 5,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000021",
+                "name": "storagePrefix",
+                "type": "Literal",
+                "value": "react-oauth2-hook"
+            }
+        },
+        "undocumented": true,
+        "name": "storagePrefix",
+        "longname": "storagePrefix",
+        "kind": "constant",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                189,
+                246
+            ],
+            "filename": "index.js",
+            "lineno": 6,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000025",
+                "name": "oauthStateName",
+                "type": "BinaryExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "oauthStateName",
+        "longname": "oauthStateName",
+        "kind": "constant",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "/**\n * useOAuth2Token is a React hook providing an OAuth2 implicit grant token.\n *\n * When useToken is called, it will attempt to retrieve an existing\n * token by the criteria of `{ authorizeUrl, scopes, clientID }`.\n * If a token by these specifications does not exist, the first\n * item in the returned array will be `undefined`.\n *\n * If the user wishes to retrieve a new token, they can call `getToken()`,\n * a function returned by the second parameter. When called, the function\n * will open a window for the user to confirm the OAuth grant, and\n * pass it back as expected via the hook.\n *\n * The OAuth token must be passed to a static endpoint. As\n * such, the `callbackUrl` must be passed with this endpoint.\n * The `callbackUrl` should render the `Callback` component,\n * which will securely verify the token and pass it back,\n * before closing the window.\n *\n * All instances of this hook requesting the same token and scopes\n * from the same place are synchronised. In concrete terms,\n * if you have many components waiting for a Facebook OAuth token\n * to make a call, they will all immediately update when any component\n * gets a token.\n *\n * Finally, in advanced cases the user can manually overwrite any\n * stored token by capturing and calling the third item in\n * the reponse array with the new value.\n *\n * @param {string} {authorizeUrl} The OAuth2 authorize endpoint\n * @param {string[]} {scope} The scopes to request\n * @param {string} {redirectUri} The endpoint that recieves the OAuth2 callback\n * @param {string} {clientID} The OAuth2 client client_id\n * @example\n * const SpotifyTracks = () => {\n *  const [token, getToken] = useOAuth2Token({\n *      authorizeUrl: \"https://accounts.spotify.com/authorize\",\n *      scope: [\"user-library-read\"],\n *      clientID: \"abcdefg\",\n *      redirectUri: document.location.origin + \"/callback\"\n *  })\n *\n *  const [response, setResponse] = React.useState()\n *  const [error, setError] = React.useState()\n *\n *  // when we get a token, query spotify\n *  React.useEffect(() => {\n *      if (token == undefined) {return}\n *      fetch('https://api.spotify.com/v1/me/tracks', {\n *          headers: {\n *              Authorization: `Bearer ${token}`\n *          }\n *      }).then(\n *          json => response.json()\n *      ).then(\n *          data => setResponse(data)\n *      ).catch(\n *          error => setError(error)\n *      )\n *  }, [token])\n *\n *  if (!token || error) return <div onClick={getToken}> login with Spotify </div>\n *\n * return <div>\n *  Your saved tracks on Spotify: {JSON.stringify(response)}\n * </div>\n * }\n */",
+        "meta": {
+            "range": [
+                2844,
+                3445
+            ],
+            "filename": "index.js",
+            "lineno": 76,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000030",
+                "name": "exports.useOAuth2Token",
+                "type": "VariableDeclaration"
+            }
+        },
+        "description": "useOAuth2Token is a React hook providing an OAuth2 implicit grant token.\n\nWhen useToken is called, it will attempt to retrieve an existing\ntoken by the criteria of `{ authorizeUrl, scopes, clientID }`.\nIf a token by these specifications does not exist, the first\nitem in the returned array will be `undefined`.\n\nIf the user wishes to retrieve a new token, they can call `getToken()`,\na function returned by the second parameter. When called, the function\nwill open a window for the user to confirm the OAuth grant, and\npass it back as expected via the hook.\n\nThe OAuth token must be passed to a static endpoint. As\nsuch, the `callbackUrl` must be passed with this endpoint.\nThe `callbackUrl` should render the `Callback` component,\nwhich will securely verify the token and pass it back,\nbefore closing the window.\n\nAll instances of this hook requesting the same token and scopes\nfrom the same place are synchronised. In concrete terms,\nif you have many components waiting for a Facebook OAuth token\nto make a call, they will all immediately update when any component\ngets a token.\n\nFinally, in advanced cases the user can manually overwrite any\nstored token by capturing and calling the third item in\nthe reponse array with the new value.",
+        "params": [
+            {
+                "type": {
+                    "names": [
+                        "string"
+                    ]
+                },
+                "description": "The OAuth2 authorize endpoint",
+                "name": "{authorizeUrl}"
+            },
+            {
+                "type": {
+                    "names": [
+                        "Array.<string>"
+                    ]
+                },
+                "description": "The scopes to request",
+                "name": "{scope}"
+            },
+            {
+                "type": {
+                    "names": [
+                        "string"
+                    ]
+                },
+                "description": "The endpoint that recieves the OAuth2 callback",
+                "name": "{redirectUri}"
+            },
+            {
+                "type": {
+                    "names": [
+                        "string"
+                    ]
+                },
+                "description": "The OAuth2 client client_id",
+                "name": "{clientID}"
+            }
+        ],
+        "examples": [
+            "const SpotifyTracks = () => {\n const [token, getToken] = useOAuth2Token({\n     authorizeUrl: \"https://accounts.spotify.com/authorize\",\n     scope: [\"user-library-read\"],\n     clientID: \"abcdefg\",\n     redirectUri: document.location.origin + \"/callback\"\n })\n\n const [response, setResponse] = React.useState()\n const [error, setError] = React.useState()\n\n // when we get a token, query spotify\n React.useEffect(() => {\n     if (token == undefined) {return}\n     fetch('https://api.spotify.com/v1/me/tracks', {\n         headers: {\n             Authorization: `Bearer ${token}`\n         }\n     }).then(\n         json => response.json()\n     ).then(\n         data => setResponse(data)\n     ).catch(\n         error => setError(error)\n     )\n }, [token])\n\n if (!token || error) return <div onClick={getToken}> login with Spotify </div>\n\nreturn <div>\n Your saved tracks on Spotify: {JSON.stringify(response)}\n</div>\n}"
+        ],
+        "name": "useOAuth2Token",
+        "longname": "useOAuth2Token",
+        "kind": "constant",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2857,
+                3445
+            ],
+            "filename": "index.js",
+            "lineno": 76,
+            "columnno": 13,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000032",
+                "name": "useOAuth2Token",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "target": "useOAuth2Token~target",
+                "undefined": null,
+                "getToken": "useOAuth2Token~getToken",
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "useOAuth2Token",
+        "longname": "useOAuth2Token",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2879,
+                2891
+            ],
+            "filename": "index.js",
+            "lineno": 77,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000036",
+                "name": "authorizeUrl",
+                "type": "Identifier",
+                "value": "authorizeUrl"
+            }
+        },
+        "undocumented": true,
+        "name": "authorizeUrl",
+        "longname": "authorizeUrl",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2895,
+                2905
+            ],
+            "filename": "index.js",
+            "lineno": 78,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000038",
+                "name": "scope",
+                "type": "AssignmentPattern",
+                "value": "scope"
+            }
+        },
+        "undocumented": true,
+        "name": "scope",
+        "longname": "scope",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2909,
+                2920
+            ],
+            "filename": "index.js",
+            "lineno": 79,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000042",
+                "name": "redirectUri",
+                "type": "Identifier",
+                "value": "redirectUri"
+            }
+        },
+        "undocumented": true,
+        "name": "redirectUri",
+        "longname": "redirectUri",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2924,
+                2932
+            ],
+            "filename": "index.js",
+            "lineno": 80,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000044",
+                "name": "clientID",
+                "type": "Identifier",
+                "value": "clientID"
+            }
+        },
+        "undocumented": true,
+        "name": "clientID",
+        "longname": "clientID",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2949,
+                2997
+            ],
+            "filename": "index.js",
+            "lineno": 82,
+            "columnno": 8,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000048",
+                "name": "target",
+                "type": "ObjectExpression",
+                "value": "{\"authorizeUrl\":\"\",\"scope\":\"\",\"clientID\":\"\"}"
+            }
+        },
+        "undocumented": true,
+        "name": "target",
+        "longname": "useOAuth2Token~target",
+        "kind": "constant",
+        "memberof": "useOAuth2Token",
+        "scope": "inner",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2964,
+                2976
+            ],
+            "filename": "index.js",
+            "lineno": 83,
+            "columnno": 4,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000051",
+                "name": "authorizeUrl",
+                "type": "Identifier",
+                "value": "authorizeUrl"
+            }
+        },
+        "undocumented": true,
+        "name": "authorizeUrl",
+        "longname": "useOAuth2Token~target.authorizeUrl",
+        "kind": "member",
+        "memberof": "useOAuth2Token~target",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2978,
+                2983
+            ],
+            "filename": "index.js",
+            "lineno": 83,
+            "columnno": 18,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000053",
+                "name": "scope",
+                "type": "Identifier",
+                "value": "scope"
+            }
+        },
+        "undocumented": true,
+        "name": "scope",
+        "longname": "useOAuth2Token~target.scope",
+        "kind": "member",
+        "memberof": "useOAuth2Token~target",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                2985,
+                2993
+            ],
+            "filename": "index.js",
+            "lineno": 83,
+            "columnno": 25,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000055",
+                "name": "clientID",
+                "type": "Identifier",
+                "value": "clientID"
+            }
+        },
+        "undocumented": true,
+        "name": "clientID",
+        "longname": "useOAuth2Token~target.clientID",
+        "kind": "member",
+        "memberof": "useOAuth2Token~target",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3163,
+                3405
+            ],
+            "filename": "index.js",
+            "lineno": 94,
+            "columnno": 8,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000078",
+                "name": "getToken",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "state": "useOAuth2Token~getToken~state"
+            }
+        },
+        "undocumented": true,
+        "name": "getToken",
+        "longname": "useOAuth2Token~getToken",
+        "kind": "function",
+        "memberof": "useOAuth2Token",
+        "scope": "inner",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3195,
+                3274
+            ],
+            "filename": "index.js",
+            "lineno": 95,
+            "columnno": 13,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000085",
+                "name": "state",
+                "type": "CallExpression",
+                "funcscope": "useOAuth2Token~getToken",
+                "value": "",
+                "paramnames": []
+            }
+        },
+        "undocumented": true,
+        "name": "state",
+        "longname": "useOAuth2Token~getToken~state",
+        "kind": "member",
+        "memberof": "useOAuth2Token~getToken",
+        "scope": "inner"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3226,
+                3253
+            ],
+            "filename": "index.js",
+            "lineno": 96,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000092",
+                "name": "nonce",
+                "type": "CallExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "nonce",
+        "longname": "nonce",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3261,
+                3267
+            ],
+            "filename": "index.js",
+            "lineno": 97,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000095",
+                "name": "target",
+                "type": "Identifier",
+                "value": "target"
+            }
+        },
+        "undocumented": true,
+        "name": "target",
+        "longname": "target",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3320,
+                3325
+            ],
+            "filename": "index.js",
+            "lineno": 101,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000105",
+                "name": "scope",
+                "type": "Identifier",
+                "value": "scope"
+            }
+        },
+        "undocumented": true,
+        "name": "scope",
+        "longname": "scope",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3333,
+                3341
+            ],
+            "filename": "index.js",
+            "lineno": 102,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000107",
+                "name": "clientID",
+                "type": "Identifier",
+                "value": "clientID"
+            }
+        },
+        "undocumented": true,
+        "name": "clientID",
+        "longname": "clientID",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3349,
+                3361
+            ],
+            "filename": "index.js",
+            "lineno": 103,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000109",
+                "name": "authorizeUrl",
+                "type": "Identifier",
+                "value": "authorizeUrl"
+            }
+        },
+        "undocumented": true,
+        "name": "authorizeUrl",
+        "longname": "authorizeUrl",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3369,
+                3374
+            ],
+            "filename": "index.js",
+            "lineno": 104,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000111",
+                "name": "state",
+                "type": "Identifier",
+                "value": "state"
+            }
+        },
+        "undocumented": true,
+        "name": "state",
+        "longname": "state",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3382,
+                3393
+            ],
+            "filename": "index.js",
+            "lineno": 105,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000113",
+                "name": "redirectUri",
+                "type": "Identifier",
+                "value": "redirectUri"
+            }
+        },
+        "undocumented": true,
+        "name": "redirectUri",
+        "longname": "redirectUri",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3453,
+                3608
+            ],
+            "filename": "index.js",
+            "lineno": 112,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000121",
+                "name": "cryptoRandomString",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "entropy": "cryptoRandomString~entropy"
+            }
+        },
+        "undocumented": true,
+        "name": "cryptoRandomString",
+        "longname": "cryptoRandomString",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3490,
+                3519
+            ],
+            "filename": "index.js",
+            "lineno": 113,
+            "columnno": 8,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000126",
+                "name": "entropy",
+                "type": "NewExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "entropy",
+        "longname": "cryptoRandomString~entropy",
+        "kind": "constant",
+        "memberof": "cryptoRandomString",
+        "scope": "inner",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3616,
+                3926
+            ],
+            "filename": "index.js",
+            "lineno": 119,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000152",
+                "name": "OAuth2AuthorizeURL",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "OAuth2AuthorizeURL",
+        "longname": "OAuth2AuthorizeURL",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3642,
+                3647
+            ],
+            "filename": "index.js",
+            "lineno": 120,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000156",
+                "name": "scope",
+                "type": "Identifier",
+                "value": "scope"
+            }
+        },
+        "undocumented": true,
+        "name": "scope",
+        "longname": "scope",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3651,
+                3659
+            ],
+            "filename": "index.js",
+            "lineno": 121,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000158",
+                "name": "clientID",
+                "type": "Identifier",
+                "value": "clientID"
+            }
+        },
+        "undocumented": true,
+        "name": "clientID",
+        "longname": "clientID",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3663,
+                3668
+            ],
+            "filename": "index.js",
+            "lineno": 122,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000160",
+                "name": "state",
+                "type": "Identifier",
+                "value": "state"
+            }
+        },
+        "undocumented": true,
+        "name": "state",
+        "longname": "state",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3672,
+                3684
+            ],
+            "filename": "index.js",
+            "lineno": 123,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000162",
+                "name": "authorizeUrl",
+                "type": "Identifier",
+                "value": "authorizeUrl"
+            }
+        },
+        "undocumented": true,
+        "name": "authorizeUrl",
+        "longname": "authorizeUrl",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3688,
+                3699
+            ],
+            "filename": "index.js",
+            "lineno": 124,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000164",
+                "name": "redirectUri",
+                "type": "Identifier",
+                "value": "redirectUri"
+            }
+        },
+        "undocumented": true,
+        "name": "redirectUri",
+        "longname": "redirectUri",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3744,
+                3766
+            ],
+            "filename": "index.js",
+            "lineno": 126,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000180",
+                "name": "scope",
+                "type": "CallExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "scope",
+        "longname": "scope",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3770,
+                3789
+            ],
+            "filename": "index.js",
+            "lineno": 127,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000186",
+                "name": "client_id",
+                "type": "Identifier",
+                "value": "clientID"
+            }
+        },
+        "undocumented": true,
+        "name": "client_id",
+        "longname": "client_id",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3793,
+                3798
+            ],
+            "filename": "index.js",
+            "lineno": 128,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000188",
+                "name": "state",
+                "type": "Identifier",
+                "value": "state"
+            }
+        },
+        "undocumented": true,
+        "name": "state",
+        "longname": "state",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3802,
+                3827
+            ],
+            "filename": "index.js",
+            "lineno": 129,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000190",
+                "name": "redirect_uri",
+                "type": "Identifier",
+                "value": "redirectUri"
+            }
+        },
+        "undocumented": true,
+        "name": "redirect_uri",
+        "longname": "redirect_uri",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3831,
+                3853
+            ],
+            "filename": "index.js",
+            "lineno": 130,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000192",
+                "name": "response_type",
+                "type": "Literal",
+                "value": "token"
+            }
+        },
+        "undocumented": true,
+        "name": "response_type",
+        "longname": "response_type",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3928,
+                4000
+            ],
+            "filename": "index.js",
+            "lineno": 133,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000210",
+                "name": "exports.ErrIncorrectStateToken",
+                "type": "VariableDeclaration"
+            }
+        },
+        "undocumented": true,
+        "name": "ErrIncorrectStateToken",
+        "longname": "ErrIncorrectStateToken",
+        "kind": "constant",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                3941,
+                4000
+            ],
+            "filename": "index.js",
+            "lineno": 133,
+            "columnno": 13,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000212",
+                "name": "ErrIncorrectStateToken",
+                "type": "NewExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "ErrIncorrectStateToken",
+        "longname": "ErrIncorrectStateToken",
+        "kind": "constant",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                4008,
+                4108
+            ],
+            "filename": "index.js",
+            "lineno": 135,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000218",
+                "name": "urlDecode",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "urlDecode",
+        "longname": "urlDecode",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                4116,
+                4714
+            ],
+            "filename": "index.js",
+            "lineno": 138,
+            "columnno": 6,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000244",
+                "name": "OAuthCallbackHandler",
+                "type": "ArrowFunctionExpression"
+            },
+            "vars": {
+                "undefined": null,
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "OAuthCallbackHandler",
+        "longname": "OAuthCallbackHandler",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                4202,
+                4208
+            ],
+            "filename": "index.js",
+            "lineno": 140,
+            "columnno": 10,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000257",
+                "name": "target",
+                "type": "Identifier",
+                "value": "target"
+            }
+        },
+        "undocumented": true,
+        "name": "target",
+        "longname": "target",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                4418,
+                4546
+            ],
+            "filename": "index.js",
+            "lineno": 148,
+            "columnno": 10,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000292",
+                "name": "params",
+                "type": "NewExpression",
+                "value": ""
+            }
+        },
+        "undocumented": true,
+        "name": "params",
+        "longname": "<anonymous>~params",
+        "kind": "constant",
+        "memberof": "<anonymous>",
+        "scope": "inner",
+        "params": []
+    },
+    {
+        "comment": "/**\n * OAuthCallback is a React component that handles the callback\n * step of the OAuth2 protocol.\n *\n * OAuth2Callback is expected to be rendered on the url corresponding\n * to your redirect_uri.\n *\n * By default, this component will deal with errors by closing the window,\n * via its own React error boundary. Pass `{ errorBoundary: false }`\n * to handle this functionality yourself.\n *\n * @example\n * <Route exact path=\"/callback\" component={OAuthCallback} />} />\n */",
+        "meta": {
+            "range": [
+                5188,
+                5402
+            ],
+            "filename": "index.js",
+            "lineno": 176,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000347",
+                "name": "exports.OAuthCallback",
+                "type": "VariableDeclaration"
+            }
+        },
+        "description": "OAuthCallback is a React component that handles the callback\nstep of the OAuth2 protocol.\n\nOAuth2Callback is expected to be rendered on the url corresponding\nto your redirect_uri.\n\nBy default, this component will deal with errors by closing the window,\nvia its own React error boundary. Pass `{ errorBoundary: false }`\nto handle this functionality yourself.",
+        "examples": [
+            "<Route exact path=\"/callback\" component={OAuthCallback} />} />"
+        ],
+        "name": "OAuthCallback",
+        "longname": "OAuthCallback",
+        "kind": "constant",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5201,
+                5402
+            ],
+            "filename": "index.js",
+            "lineno": 176,
+            "columnno": 13,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000349",
+                "name": "OAuthCallback",
+                "type": "ArrowFunctionExpression"
+            }
+        },
+        "undocumented": true,
+        "name": "OAuthCallback",
+        "longname": "OAuthCallback",
+        "kind": "function",
+        "scope": "global",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5222,
+                5242
+            ],
+            "filename": "index.js",
+            "lineno": 177,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000353",
+                "name": "errorBoundary",
+                "type": "AssignmentPattern",
+                "value": "errorBoundary"
+            }
+        },
+        "undocumented": true,
+        "name": "errorBoundary",
+        "longname": "errorBoundary",
+        "kind": "member",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5404,
+                5465
+            ],
+            "filename": "index.js",
+            "lineno": 185,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000378",
+                "name": "OAuthCallback.propTypes",
+                "type": "ObjectExpression",
+                "value": "{\"errorBoundary\":\"\"}",
+                "paramnames": []
+            }
+        },
+        "undocumented": true,
+        "name": "propTypes",
+        "longname": "OAuthCallback.propTypes",
+        "kind": "member",
+        "memberof": "OAuthCallback",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5434,
+                5463
+            ],
+            "filename": "index.js",
+            "lineno": 186,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000383",
+                "name": "errorBoundary",
+                "type": "MemberExpression",
+                "value": "PropTypes.bool"
+            }
+        },
+        "undocumented": true,
+        "name": "errorBoundary",
+        "longname": "OAuthCallback.propTypes.errorBoundary",
+        "kind": "member",
+        "memberof": "OAuthCallback.propTypes",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5467,
+                5660
+            ],
+            "filename": "index.js",
+            "lineno": 189,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000387",
+                "name": "ClosingErrorBoundary",
+                "type": "ClassDeclaration",
+                "paramnames": []
+            }
+        },
+        "undocumented": true,
+        "name": "ClosingErrorBoundary",
+        "longname": "ClosingErrorBoundary",
+        "kind": "class",
+        "scope": "global"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5526,
+                5615
+            ],
+            "filename": "index.js",
+            "lineno": 190,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000393",
+                "name": "ClosingErrorBoundary.getDerivedStateFromError",
+                "type": "MethodDefinition",
+                "paramnames": [
+                    "error"
+                ]
+            },
+            "vars": {
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "getDerivedStateFromError",
+        "longname": "ClosingErrorBoundary.getDerivedStateFromError",
+        "kind": "function",
+        "memberof": "ClosingErrorBoundary",
+        "scope": "static",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5619,
+                5658
+            ],
+            "filename": "index.js",
+            "lineno": 195,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000404",
+                "name": "ClosingErrorBoundary#render",
+                "type": "MethodDefinition",
+                "paramnames": []
+            },
+            "vars": {
+                "": null
+            }
+        },
+        "undocumented": true,
+        "name": "render",
+        "longname": "ClosingErrorBoundary#render",
+        "kind": "function",
+        "memberof": "ClosingErrorBoundary",
+        "scope": "instance",
+        "params": []
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5662,
+                5731
+            ],
+            "filename": "index.js",
+            "lineno": 198,
+            "columnno": 0,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000415",
+                "name": "ClosingErrorBoundary.propTypes",
+                "type": "ObjectExpression",
+                "value": "{\"children\":\"\"}",
+                "paramnames": []
+            }
+        },
+        "undocumented": true,
+        "name": "propTypes",
+        "longname": "ClosingErrorBoundary.propTypes",
+        "kind": "member",
+        "memberof": "ClosingErrorBoundary",
+        "scope": "static"
+    },
+    {
+        "comment": "",
+        "meta": {
+            "range": [
+                5699,
+                5729
+            ],
+            "filename": "index.js",
+            "lineno": 199,
+            "columnno": 2,
+            "path": "/Users/tshadwel/Documents/devel/react-oauth2-popout/src",
+            "code": {
+                "id": "astnode100000420",
+                "name": "children",
+                "type": "MemberExpression",
+                "value": "PropTypes.isRequired"
+            }
+        },
+        "undocumented": true,
+        "name": "children",
+        "longname": "ClosingErrorBoundary.propTypes.children",
+        "kind": "member",
+        "memberof": "ClosingErrorBoundary.propTypes",
+        "scope": "static"
+    },
+    {
+        "kind": "package",
+        "longname": "package:undefined",
+        "files": [
+            "/Users/tshadwel/Documents/devel/react-oauth2-popout/src/doc.js",
+            "/Users/tshadwel/Documents/devel/react-oauth2-popout/src/index.js",
+            "/Users/tshadwel/Documents/devel/react-oauth2-popout/src/test.js"
+        ]
+    }
+]

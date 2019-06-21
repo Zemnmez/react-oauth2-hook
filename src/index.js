@@ -2,7 +2,6 @@ import React from 'react'
 import { useStorage } from 'react-storage-hook'
 import { Map } from 'immutable'
 import PropTypes from 'prop-types'
-
 const storagePrefix = 'react-oauth2-hook'
 const oauthStateName = storagePrefix + '-state-token-challenge'
 
@@ -35,6 +34,10 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  * stored token by capturing and calling the third item in
  * the reponse array with the new value.
  *
+ * @param {string} {authorizeUrl} The OAuth2 authorize endpoint
+ * @param {string[]} {scope} The scopes to request
+ * @param {string} {redirectUri} The endpoint that recieves the OAuth2 callback
+ * @param {string} {clientID} The OAuth2 client client_id
  * @example
  * const SpotifyTracks = () => {
  *  const [token, getToken] = useOAuth2Token({
