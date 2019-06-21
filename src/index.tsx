@@ -93,9 +93,23 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  *}
  */
 export const useOAuth2Token = ({
+  /**
+   * The OAuth authorize URL to retrieve the token
+   * from.
+   */
   authorizeUrl,
+  /**
+   * The OAuth scopes to request.
+   */
   scope = [],
+  /**
+   * The OAuth `redirect_uri` callback.
+   */
   redirectUri,
+  /**
+   * The OAuth `client_id` corresponding to the
+   * requesting client.
+   */
   clientID
 }: {
   authorizeUrl: string
@@ -233,6 +247,10 @@ const OAuthCallbackHandler = () => {
  * <Route exact path="/callback" component={OAuthCallback} />} />
  */
 export const OAuthCallback: React.FunctionComponent<{
+  /**
+   * When set to true, errors are thrown
+   * instead of just closing the window.
+   */
   errorBoundary?: boolean
 }> = ({
   errorBoundary = true

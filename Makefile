@@ -3,16 +3,17 @@ dist: src $(wildcard src/*)
 
 .INTERMEDIATE: docs
 docs: src/doc.tsx $(wildcard src/*.ts*)
-	yarn run typedoc --entryPoint react-oauth2-hook --theme markdown --out $@
+	yarn run typedoc --entryPoint 'react-oauth2-hook' --theme markdown --out docs/
+	mv docs/* .
+	rm -r docs
 
 README.md: docs
-	cp $</README.md $@
 
 src/doc.tsx: templates/pkgdoc_templ.jq pkginfo.json
 	jq -r -f $^ > $@
 
 .INTERMEDIATE: pkginfo.json
-pkginfo.json: example/src/App.js DESC.md
+pkginfo.json: example/src/example.js DESC.md
 	jq '[.,                                           \
 		{documentation: $$docs},                    \
 		{example: $$example, examplefile: $$examplefile},       \
