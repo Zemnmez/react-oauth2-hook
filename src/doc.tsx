@@ -4,7 +4,7 @@
  * @requires react
  * @requires react-dom
  * @summary Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
- * @version 1.0.5
+ * @version 1.0.8
  * @author zemnmez
  * @copyright zemnmez 2019
  * @license MIT
@@ -19,7 +19,7 @@
  * and a react component, [[OAuthCallback]] which should be mounted at the
  * OAuth callback endpoint.
  * 
- * Take a look at the [Example](#Example) for usage information.
+ * Take a look at the [Example](#example) for usage information.
  * 
  * ## Security Considerations
  * OAuth 2 is a very sensitive protocol. I've done my best to provide good security

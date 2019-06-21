@@ -256,7 +256,7 @@ const OAuthCallbackHandler = () => {
 }
 
 /**
- * OAuthCallback is a React.FunctionComponent that handles the callback
+ * OAuthCallback is a React component that handles the callback
  * step of the OAuth2 protocol.
  *
  * OAuth2Callback is expected to be rendered on the url corresponding
