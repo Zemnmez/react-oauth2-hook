@@ -125,7 +125,7 @@ export const useOAuth2Token = ({
     authorizeUrl, scope, clientID
   }
 
-  const [token, setToken]: [OAuthToken, (newValue: string) => void] = useStorage(
+  const [token, setToken]: [OAuthToken | undefined, (newValue: string) => void] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
   )
 
@@ -168,7 +168,7 @@ export type getToken = () => void
  * `setToken(undefined)` can be used to synchronously
  * invalidate all instances of this OAuth token.
  */
-export type setToken = (token: string) => void
+export type setToken = (newValue: OAuthToken | undefined) => void
 
 /**
  * @hidden
@@ -228,7 +228,7 @@ const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split
 /**
  * @hidden
  */
-const OAuthCallbackHandler = () => {
+const OAuthCallbackHandler: React.FunctionComponent<{}> = () => {
   const [state] = useStorage(oauthStateName)
   const { target } = JSON.parse(state)
   const [ /* token */, setToken ] = useStorage(

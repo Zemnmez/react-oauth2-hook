@@ -9,6 +9,11 @@ docs: src/doc.tsx $(wildcard src/*.ts*)
 	rm -r docs
 
 README.md: docs
+	# by default, typedoc makes the header of the module a second-level
+	# header and puts it in a quote. i have no explanation for why
+	# but this does fix it.
+	sed -E -i .backup '1s/^> *#(.*)/\1/' README.md
+	rm $@.backup
 
 src/doc.tsx: templates/pkgdoc_templ.jq pkginfo.json
 	jq -r -f $^ > $@
