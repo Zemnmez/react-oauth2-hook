@@ -1,8 +1,5 @@
-header.md: README_TEMPL.jq package.json
-	jq -r "$$(cat $<)" package.json > $@
+dist: src $(wildcard src/*)
+	yarn run rollup -c
 
-jsdoc.md: $(wildcard src/*.js)
-	npx jsdoc2md $^ > $@
-
-README.md: header.md jsdoc.md
-	cat $^ > $@
+doc: $(wildcard src/*.ts*)
+	yarn run typedoc --theme markdown --out $@
