@@ -39,7 +39,7 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  *
  * The OAuth token must be passed to a static endpoint. As
  * such, the `callbackUrl` must be passed with this endpoint.
- * The `callbackUrl` should render the `Callback` component,
+ * The `callbackUrl` should render the [[OAuthCallback]] component,
  * which will securely verify the token and pass it back,
  * before closing the window.
  *
@@ -116,12 +116,16 @@ export const useOAuth2Token = ({
   scope: string[],
   redirectUri: string,
   clientID: string
-}) => {
+}): [
+  OAuthToken | undefined,
+  getToken,
+  setToken
+] => {
   const target = {
     authorizeUrl, scope, clientID
   }
 
-  const [token, setToken] = useStorage(
+  const [token, setToken]: [OAuthToken, (newValue: string) => void] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
   )
 
@@ -146,6 +150,25 @@ export const useOAuth2Token = ({
 
   return [token, getToken, setToken]
 }
+
+/**
+ * OAuthToken represents an OAuth2 implicit grant token.
+ */
+export type OAuthToken = string
+
+/**
+ * getToken is returned by [[useOAuth2Token]].
+ * When called, it prompts the user to authorize.
+ */
+export type getToken = () => void
+
+/**
+ * setToken is returned by [[useOAuth2Token]].
+ * When called, it overwrites any stored OAuth token.
+ * `setToken(undefined)` can be used to synchronously
+ * invalidate all instances of this OAuth token.
+ */
+export type setToken = (token: string) => void
 
 /**
  * @hidden
@@ -233,7 +256,7 @@ const OAuthCallbackHandler = () => {
 }
 
 /**
- * OAuthCallback is a React component that handles the callback
+ * OAuthCallback is a React.FunctionComponent that handles the callback
  * step of the OAuth2 protocol.
  *
  * OAuth2Callback is expected to be rendered on the url corresponding
@@ -247,12 +270,12 @@ const OAuthCallbackHandler = () => {
  * <Route exact path="/callback" component={OAuthCallback} />} />
  */
 export const OAuthCallback: React.FunctionComponent<{
+  errorBoundary?: boolean
+}> = ({
   /**
    * When set to true, errors are thrown
    * instead of just closing the window.
    */
-  errorBoundary?: boolean
-}> = ({
   errorBoundary = true
 }) => {
   if (errorBoundary === false) return <OAuthCallbackHandler />

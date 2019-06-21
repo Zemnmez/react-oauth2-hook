@@ -1,8 +1,6 @@
 def jsdoc: "/**\n" + (. | split("\n") | map(" * " + .) | join("\n")) + "\n */";
 
 ("
-> \(.description)
-
 @module \(.name)
 \(.requirements | map("@requires " + .) | join("\n") )
 @summary \(.description)
