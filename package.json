@@ -15,7 +15,8 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "rollup -c && make readme.md",
+    "build": "rollup -c",
+    "make": "make -j",
     "start": "rollup -c -w",
     "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
@@ -51,6 +52,7 @@
     "rollup-plugin-typescript2": "^0.17.0",
     "rollup-plugin-url": "^1.4.0",
     "typedoc": "^0.14.2",
+    "typedoc-plugin-external-module-name": "^2.1.0",
     "typedoc-plugin-markdown": "^2.0.5",
     "typescript": "^2.8.3"
   },

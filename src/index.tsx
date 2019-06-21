@@ -1,9 +1,27 @@
-import React from 'react'
-import { useStorage } from 'react-storage-hook'
-import { Map } from 'immutable'
-import PropTypes from 'prop-types'
+/**
+ * @module react-oauth2-hook
+ */
 
+/**
+ *
+ */
+
+import * as React from 'react'
+
+// react-storage-hook.d.ts
+import { useStorage } from 'react-storage-hook'
+
+import { Map } from 'immutable'
+import * as PropTypes from 'prop-types'
+
+/**
+ * @hidden
+ */
 const storagePrefix = 'react-oauth2-hook'
+
+/**
+ * @hidden
+ */
 const oauthStateName = storagePrefix + '-state-token-challenge'
 
 /**
@@ -35,6 +53,10 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  * stored token by capturing and calling the third item in
  * the reponse array with the new value.
  *
+ * @param authorizeUrl The OAuth authorize URL to retrieve the token from.
+ * @param scope The OAuth scopes to request.
+ * @param redirectUri The OAuth redirect_uri callback URL.
+ * @param clientID The OAuth client_id corresponding to the requesting client.
  * @example
  * const SpotifyTracks = () => {
  *  const [token, getToken] = useOAuth2Token({
@@ -75,6 +97,11 @@ export const useOAuth2Token = ({
   scope = [],
   redirectUri,
   clientID
+}: {
+  authorizeUrl: string
+  scope: string[],
+  redirectUri: string,
+  clientID: string
 }) => {
   const target = {
     authorizeUrl, scope, clientID
@@ -106,6 +133,9 @@ export const useOAuth2Token = ({
   return [token, getToken, setToken]
 }
 
+/**
+ * @hidden
+ */
 const cryptoRandomString = () => {
   const entropy = new Uint32Array(10)
   window.crypto.getRandomValues(entropy)
@@ -113,12 +143,21 @@ const cryptoRandomString = () => {
   return window.btoa([...entropy].join(','))
 }
 
+/**
+ * @hidden
+ */
 const OAuth2AuthorizeURL = ({
   scope,
   clientID,
   state,
   authorizeUrl,
   redirectUri
+}: {
+  scope: string[],
+  clientID: string,
+  state: string,
+  authorizeUrl: string,
+  redirectUri: string
 }) => `${authorizeUrl}?${Object.entries({
   scope: scope.join(','),
   client_id: clientID,
@@ -127,11 +166,31 @@ const OAuth2AuthorizeURL = ({
   response_type: 'token'
 }).map(([k, v]) => [k, v].map(encodeURIComponent).join('=')).join('&')}`
 
+/**
+ * This error is thrown by the [[OAuthCallback]]
+ * when the state token recieved is incorrect or does not exist.
+ */
 export const ErrIncorrectStateToken = new Error('incorrect state token')
 
-const urlDecode = str => new Map(str.split('&').map(
-  param => param.split('=').map(decodeURIComponent)))
+/**
+ * This error is thrown by the [[OAuthCallback]]
+ * if no access_token is recieved.
+ */
+export const ErrNoAccessToken = new Error('no access_token')
 
+
+/**
+ * @hidden
+ */
+const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split('&').map<[string,string]>(
+  (param: string): [string,string] => {
+    const [k, v] = param.split('=').map(decodeURIComponent)
+    return [k, v]
+  }))
+
+/**
+ * @hidden
+ */
 const OAuthCallbackHandler = () => {
   const [state] = useStorage(oauthStateName)
   const { target } = JSON.parse(state)
@@ -142,18 +201,21 @@ const OAuthCallbackHandler = () => {
   console.log('rendering OAuthCallbackHandler')
 
   React.useEffect(() => {
-    const params = new Map([
+    const params: Map<string,string> = Map([
       ...urlDecode(window.location.search.slice(1)),
       ...urlDecode(window.location.hash.slice(1))
     ])
 
     if (state !== params.get('state')) throw ErrIncorrectStateToken
 
-    setToken(params.get('access_token'))
+    const token: string | undefined = params.get('access_token')
+    if (token == undefined) throw ErrNoAccessToken
+
+    setToken(token)
     window.close()
   }, [])
 
-  return 'please wait...'
+  return <React.Fragment>'please wait...'</React.Fragment>
 }
 
 /**
@@ -170,7 +232,9 @@ const OAuthCallbackHandler = () => {
  * @example
  * <Route exact path="/callback" component={OAuthCallback} />} />
  */
-export const OAuthCallback = ({
+export const OAuthCallback: React.FunctionComponent<{
+  errorBoundary?: boolean
+}> = ({
   errorBoundary = true
 }) => {
   if (errorBoundary === false) return <OAuthCallbackHandler />
@@ -183,19 +247,22 @@ OAuthCallback.propTypes = {
   errorBoundary: PropTypes.bool
 }
 
+/**
+ * @hidden
+ */
 class ClosingErrorBoundary extends React.PureComponent {
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: string) {
     console.log(error)
     // window.close()
   }
 
 
   static propTypes = {
-    children: PropTypes.isRequired
+    children: PropTypes.func.isRequired
   }
 
   render() { return this.props.children }
 }
 
 
-export default 1;
+export default "this module has no default export.";
