@@ -4,7 +4,7 @@ It's implemented as a react hook, [[useOAuth2Token]], with a fairly simple API
 and a react component, [[OAuthCallback]] which should be mounted at the
 OAuth callback endpoint.
 
-Take a look at the [Example](#Example) for usage information.
+Take a look at the [Example](#example) for usage information.
 
 ## Security Considerations
 OAuth 2 is a very sensitive protocol. I've done my best to provide good security
