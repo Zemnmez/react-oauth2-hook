@@ -1,6 +1,6 @@
 {
   "name": "react-oauth2-hook",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.",
   "author": "zemnmez",
   "license": "MIT",
