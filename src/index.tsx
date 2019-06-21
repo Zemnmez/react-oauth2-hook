@@ -58,39 +58,39 @@ const oauthStateName = storagePrefix + '-state-token-challenge'
  * @param redirectUri The OAuth redirect_uri callback URL.
  * @param clientID The OAuth client_id corresponding to the requesting client.
  * @example
- * const SpotifyTracks = () => {
- *  const [token, getToken] = useOAuth2Token({
- *      authorizeUrl: "https://accounts.spotify.com/authorize",
- *      scope: ["user-library-read"],
- *      clientID: "abcdefg",
- *      redirectUri: document.location.origin + "/callback"
- *  })
+ *const SpotifyTracks = () => {
+ * const [token, getToken] = useOAuth2Token({
+ *     authorizeUrl: "https://accounts.spotify.com/authorize",
+ *     scope: ["user-library-read"],
+ *     clientID: "abcdefg",
+ *     redirectUri: document.location.origin + "/callback"
+ * })
  *
- *  const [response, setResponse] = React.useState()
- *  const [error, setError] = React.useState()
+ * const [response, setResponse] = React.useState()
+ * const [error, setError] = React.useState()
  *
- *  // when we get a token, query spotify
- *  React.useEffect(() => {
- *      if (token == undefined) {return}
- *      fetch('https://api.spotify.com/v1/me/tracks', {
- *          headers: {
- *              Authorization: `Bearer ${token}`
- *          }
- *      }).then(
- *          json => response.json()
- *      ).then(
- *          data => setResponse(data)
- *      ).catch(
- *          error => setError(error)
- *      )
- *  }, [token])
+ * // when we get a token, query spotify
+ * React.useEffect(() => {
+ *     if (token == undefined) {return}
+ *     fetch('https://api.spotify.com/v1/me/tracks', {
+ *         headers: {
+ *             Authorization: `Bearer ${token}`
+ *         }
+ *     }).then(
+ *         json => response.json()
+ *     ).then(
+ *         data => setResponse(data)
+ *     ).catch(
+ *         error => setError(error)
+ *     )
+ * }, [token])
  *
- *  if (!token || error) return <div onClick={getToken}> login with Spotify </div>
+ * if (!token || error) return <div onClick={getToken}> login with Spotify </div>
  *
- * return <div>
- *  Your saved tracks on Spotify: {JSON.stringify(response)}
- * </div>
- * }
+ *return <div>
+ * Your saved tracks on Spotify: {JSON.stringify(response)}
+ *</div>
+ *}
  */
 export const useOAuth2Token = ({
   authorizeUrl,

@@ -1,8 +1,12 @@
 dist: src $(wildcard src/*)
 	yarn run rollup -c
 
-doc: src/doc.tsx $(wildcard src/*.ts*)
+.INTERMEDIATE: docs
+docs: src/doc.tsx $(wildcard src/*.ts*)
 	yarn run typedoc --entryPoint react-oauth2-hook --theme markdown --out $@
+
+README.md: docs
+	cp $</README.md $@
 
 src/doc.tsx: templates/pkgdoc_templ.jq pkginfo.json
 	jq -r -f $^ > $@
