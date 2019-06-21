@@ -1,7 +1,7 @@
 {
   "name": "react-oauth2-hook",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.3",
+  "description": "Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.",
   "author": "zemnmez",
   "license": "MIT",
   "repository": "zemnmez/react-oauth2-hook",
@@ -13,13 +13,14 @@
     "npm": ">=5"
   },
   "scripts": {
-    "test": "cross-env CI=1 react-scripts-ts test --env=jsdom",
-    "test:watch": "react-scripts-ts test --env=jsdom",
-    "build": "rollup -c",
+    "test": "cross-env CI=1 react-scripts test --env=jsdom",
+    "test:watch": "react-scripts test --env=jsdom",
+    "build": "rollup -c && make readme.md",
     "start": "rollup -c -w",
     "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
-    "deploy": "gh-pages -d example/build"
+    "deploy": "gh-pages -d example/build",
+    "readmegen": "make README.md"
   },
   "dependencies": {},
   "peerDependencies": {

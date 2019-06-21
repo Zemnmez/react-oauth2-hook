@@ -6,10 +6,15 @@
   "private": true,
   "dependencies": {
     "prop-types": "^15.6.2",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "react-scripts": "^1.1.4",
     "react-oauth2-hook": "link:.."
+    "fast-levenshtein": "^2.0.6",
+    "immutable": "link:../node_modules/immutable",
+    "prop-types": "^15.6.2",
+    "react": "link:../node_modules/react",
+    "react-dom": "link:../node_modules/react-dom",
+    "react-oauth2-hook": "link:..",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "^1.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
