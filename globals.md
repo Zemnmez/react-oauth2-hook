@@ -14,7 +14,7 @@
 
 **`summary`** Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
 
-**`version`** 1.0.3
+**`version`** 1.0.4
 
 **`author`** zemnmez
 
@@ -142,7 +142,7 @@ Your Saved Tracks: ${JSON.stringify(savedTracks)}
 
 ● **ErrIncorrectStateToken**: *`Error`* =  new Error('incorrect state token')
 
-*Defined in [index.tsx:187](https://github.com/Zemnmez/react-oauth2-hook/blob/6ed3dac/src/index.tsx#L187)*
+*Defined in [index.tsx:187](https://github.com/Zemnmez/react-oauth2-hook/blob/f05e04d/src/index.tsx#L187)*
 
 This error is thrown by the [OAuthCallback](globals.md#const-oauthcallback)
 when the state token recieved is incorrect or does not exist.
@@ -153,7 +153,7 @@ ___
 
 ● **ErrNoAccessToken**: *`Error`* =  new Error('no access_token')
 
-*Defined in [index.tsx:193](https://github.com/Zemnmez/react-oauth2-hook/blob/6ed3dac/src/index.tsx#L193)*
+*Defined in [index.tsx:193](https://github.com/Zemnmez/react-oauth2-hook/blob/f05e04d/src/index.tsx#L193)*
 
 This error is thrown by the [OAuthCallback](globals.md#const-oauthcallback)
 if no access_token is recieved.
@@ -166,7 +166,7 @@ ___
 
 ▸ **OAuthCallback**(`__namedParameters`: object): *`Element`*
 
-*Defined in [index.tsx:255](https://github.com/Zemnmez/react-oauth2-hook/blob/6ed3dac/src/index.tsx#L255)*
+*Defined in [index.tsx:255](https://github.com/Zemnmez/react-oauth2-hook/blob/f05e04d/src/index.tsx#L255)*
 
 OAuthCallback is a React component that handles the callback
 step of the OAuth2 protocol.
@@ -194,7 +194,7 @@ ___
 
 ▸ **useOAuth2Token**(`__namedParameters`: object): *string | function[]*
 
-*Defined in [index.tsx:95](https://github.com/Zemnmez/react-oauth2-hook/blob/6ed3dac/src/index.tsx#L95)*
+*Defined in [index.tsx:95](https://github.com/Zemnmez/react-oauth2-hook/blob/f05e04d/src/index.tsx#L95)*
 
 useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
 

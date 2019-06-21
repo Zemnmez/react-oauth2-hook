@@ -3,8 +3,9 @@ dist: src $(wildcard src/*)
 
 .INTERMEDIATE: docs
 docs: src/doc.tsx $(wildcard src/*.ts*)
+	- rm README.md # for some reason it ignores --entrypoint if there's an existing readme...
 	yarn run typedoc --entryPoint 'react-oauth2-hook' --theme markdown --out docs/
-	mv docs/* .
+	cp docs/* .
 	rm -r docs
 
 README.md: docs

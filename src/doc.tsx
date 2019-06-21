@@ -6,7 +6,7 @@
  * @requires react
  * @requires react-dom
  * @summary Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
- * @version 1.0.3
+ * @version 1.0.4
  * @author zemnmez
  * @copyright zemnmez 2019
  * @license MIT
