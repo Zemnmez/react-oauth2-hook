@@ -1,6 +1,6 @@
-# [react-oauth2-hook](README.md)
+> **[react-oauth2-hook](README.md)**
 
-[react-oauth2-hook](README.md) /
+[Globals]() / [react-oauth2-hook](README.md) /
 
 **`requires`** prop-types
 
@@ -81,42 +81,42 @@ import { useOAuth2Token, OAuthCallback } from 'react-oauth2-hook'
 // tracks.
 
 export default () => <Router>
-<Switch>
-<Route path="/callback" component={OAuthCallback}/>
-<Route component={SavedTracks}/>
-</Switch>
+  <Switch>
+    <Route path="/callback" component={OAuthCallback}/>
+    <Route component={SavedTracks}/>
+  </Switch>
 </Router>
 
 const SavedTracks = () => {
-const [token, getToken] = useOAuth2Token({
-authorizeUrl: "https://accounts.spotify.com/authorize",
-scope: ["user-library-read"],
-clientID: "bd9844d654f242f782509461bdba068c",
-redirectUri: document.location.href+"/callback"
-})
+  const [token, getToken] = useOAuth2Token({
+    authorizeUrl: "https://accounts.spotify.com/authorize",
+    scope: ["user-library-read"],
+    clientID: "bd9844d654f242f782509461bdba068c",
+    redirectUri: document.location.href+"/callback"
+  })
 
-const [tracks, setTracks] = React.useState();
-const [error, setError] = React.useState();
+  const [tracks, setTracks] = React.useState();
+  const [error, setError] = React.useState();
 
-// query spotify when we get a token
-React.useEffect(() => {
-fetch(
-'https://api.spotify.com/v1/me/tracks?limit=50'
-).then(response => response.json()).then(
-data => setTracks(data)
-).catch(error => setError(error))
-}, [token])
+  // query spotify when we get a token
+  React.useEffect(() => {
+    fetch(
+      'https://api.spotify.com/v1/me/tracks?limit=50'
+    ).then(response => response.json()).then(
+      data => setTracks(data)
+    ).catch(error => setError(error))
+  }, [token])
 
-return <div>
-{error && `Error occurred: ${error}`}
-{(!token || !savedTracks) && <div
-onClick={getToken}>
-login with Spotify
-</div>}
-{savedTracks && `
-Your Saved Tracks: ${JSON.stringify(savedTracks)}
-`}
-</div>
+  return <div>
+    {error && `Error occurred: ${error}`}
+    {(!token || !savedTracks) && <div
+      onClick={getToken}>
+        login with Spotify
+    </div>}
+    {savedTracks && `
+      Your Saved Tracks: ${JSON.stringify(savedTracks)}
+    `}
+  </div>
 }
 ```
 
@@ -144,7 +144,7 @@ Your Saved Tracks: ${JSON.stringify(savedTracks)}
 
 Ƭ **OAuthToken**: *string*
 
-*Defined in [index.tsx:157](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L157)*
+*Defined in [index.tsx:157](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L157)*
 
 OAuthToken represents an OAuth2 implicit grant token.
 
@@ -154,7 +154,7 @@ ___
 
 Ƭ **getToken**: *function*
 
-*Defined in [index.tsx:163](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L163)*
+*Defined in [index.tsx:163](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L163)*
 
 getToken is returned by [useOAuth2Token](README.md#const-useoauth2token).
 When called, it prompts the user to authorize.
@@ -169,7 +169,7 @@ ___
 
 Ƭ **setToken**: *function*
 
-*Defined in [index.tsx:171](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L171)*
+*Defined in [index.tsx:171](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L171)*
 
 setToken is returned by [useOAuth2Token](README.md#const-useoauth2token).
 When called, it overwrites any stored OAuth token.
@@ -178,7 +178,7 @@ invalidate all instances of this OAuth token.
 
 #### Type declaration:
 
-▸ (`newValue`: [OAuthToken](README.md#oauthtoken) | undefined): *void*
+▸ (`newValue`: *[OAuthToken](README.md#oauthtoken) | undefined*): *void*
 
 **Parameters:**
 
@@ -186,15 +186,13 @@ Name | Type |
 ------ | ------ |
 `newValue` | [OAuthToken](README.md#oauthtoken) \| undefined |
 
-___
-
 ## Variables
 
 ### `Const` ErrIncorrectStateToken
 
-● **ErrIncorrectStateToken**: *`Error`* =  new Error('incorrect state token')
+• **ErrIncorrectStateToken**: *`Error`* =  new Error('incorrect state token')
 
-*Defined in [index.tsx:210](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L210)*
+*Defined in [index.tsx:210](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L210)*
 
 This error is thrown by the [OAuthCallback](README.md#const-oauthcallback)
 when the state token recieved is incorrect or does not exist.
@@ -203,22 +201,20 @@ ___
 
 ### `Const` ErrNoAccessToken
 
-● **ErrNoAccessToken**: *`Error`* =  new Error('no access_token')
+• **ErrNoAccessToken**: *`Error`* =  new Error('no access_token')
 
-*Defined in [index.tsx:216](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L216)*
+*Defined in [index.tsx:216](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L216)*
 
 This error is thrown by the [OAuthCallback](README.md#const-oauthcallback)
 if no access_token is recieved.
-
-___
 
 ## Functions
 
 ### `Const` OAuthCallback
 
-▸ **OAuthCallback**(`__namedParameters`: object): *`Element`*
+▸ **OAuthCallback**(`__namedParameters`: *object*): *`Element`*
 
-*Defined in [index.tsx:274](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L274)*
+*Defined in [index.tsx:274](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L274)*
 
 OAuthCallback is a React component that handles the callback
 step of the OAuth2 protocol.
@@ -232,7 +228,7 @@ to handle this functionality yourself.
 
 **Parameters:**
 
-■` __namedParameters`: *object*
+▪ **__namedParameters**: *object*
 
 Name | Type | Default | Description |
 ------ | ------ | ------ | ------ |
@@ -244,9 +240,9 @@ ___
 
 ### `Const` useOAuth2Token
 
-▸ **useOAuth2Token**(`__namedParameters`: object): *[[OAuthToken](README.md#oauthtoken) | undefined, [getToken](README.md#gettoken), [setToken](README.md#settoken)]*
+▸ **useOAuth2Token**(`__namedParameters`: *object*): *[[OAuthToken](README.md#oauthtoken) | undefined, [getToken](README.md#gettoken), [setToken](README.md#settoken)]*
 
-*Defined in [index.tsx:95](https://github.com/Zemnmez/react-oauth2-hook/blob/04013a3/src/index.tsx#L95)*
+*Defined in [index.tsx:95](https://github.com/Zemnmez/react-oauth2-hook/blob/60f1d37/src/index.tsx#L95)*
 
 useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
 
@@ -278,7 +274,7 @@ the reponse array with the new value.
 
 **Parameters:**
 
-■` __namedParameters`: *object*
+▪ **__namedParameters**: *object*
 
 Name | Type | Default | Description |
 ------ | ------ | ------ | ------ |
@@ -288,5 +284,3 @@ Name | Type | Default | Description |
 `scope` | string[] |  [] | The OAuth scopes to request. |
 
 **Returns:** *[[OAuthToken](README.md#oauthtoken) | undefined, [getToken](README.md#gettoken), [setToken](README.md#settoken)]*
-
-___

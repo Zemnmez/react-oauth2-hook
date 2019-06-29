@@ -1,8 +1,10 @@
+npm = node_modules/
+
 dist: src $(wildcard src/*)
 	yarn run rollup -c
 
 .INTERMEDIATE: docs
-docs: src/doc.tsx $(wildcard src/*.ts*)
+docs: src/doc.tsx $(wildcard src/*.ts*) $(npm)/typedoc-plugin-markdown
 	- rm README.md # for some reason it ignores --entrypoint if there's an existing readme...
 	yarn run typedoc --entryPoint 'react-oauth2-hook' --theme markdown --out docs/
 	cp docs/* .
