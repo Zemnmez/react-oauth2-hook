@@ -1,10 +1,12 @@
 /**
  * @module react-oauth2-hook
+ * @requires immutable
  * @requires prop-types
  * @requires react
  * @requires react-dom
+ * @requires react-storage-hook
  * @summary Retrieve OAuth2 implicit grant tokens purely on the client without destroying application state.
- * @version 1.0.10
+ * @version 1.0.11
  * @author zemnmez
  * @copyright zemnmez 2019
  * @license MIT
