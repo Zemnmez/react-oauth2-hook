@@ -1,6 +1,6 @@
 npm = node_modules/
 
-dist: src $(wildcard src/*)
+dist: src $(wildcard src/*) tsconfig.json
 	yarn run rollup -c
 
 .INTERMEDIATE: docs

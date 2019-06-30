@@ -3451,9 +3451,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.2.7, electron-to-chromium@^1.3.164, electron-to-chromium@^1.3.30:
-  version "1.3.177"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.177.tgz#6ee78908c38f8021f6864a0ad534452fefd1e24c"
-  integrity sha512-vMoq8iU57YZgxrW9kglf1ZEBcU+Ec72OlR+SH/UdBTKS6tZTCypxa8pmD1CPZ3olU4IJX2ujilGkvpn0GHSwTQ==
+  version "1.3.179"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.179.tgz#908efa2732ca07ede53bbbb25bb6684623fbe069"
+  integrity sha512-hRjlOdKImgIRicKYRY6hHbUMrX2NJYBrIusTepwPt/apcabuzrzhXpkkWu7elWdTZEQwKV6BfX8EvWIBWLCNQw==
 
 elliptic@^6.0.0:
   version "6.5.0"
@@ -6675,9 +6675,9 @@ npm-bundled@^1.0.1:
   integrity sha512-8/JCaftHwbd//k6y2rEWp6k1wxVfpFzB6t1p825+cUb7Ym2XQfhwIC5KwhrvzZRJu+LtDE585zVaS32+CGtf0g==
 
 npm-packlist@^1.1.6:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/npm-packlist/-/npm-packlist-1.4.3.tgz#44baf075a36ec9217b307eb77a3f4eb3db0ec1ff"
-  integrity sha512-YABl09v5EoSw3uea9/gUfmqPUSbhhv7Qht8f7VKQWzTEEeUr5q+9w3jOvjIZ31v8qmR4UrkwpPvIk43MDevvsg==
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/npm-packlist/-/npm-packlist-1.4.4.tgz#866224233850ac534b63d1a6e76050092b5d2f44"
+  integrity sha512-zTLo8UcVYtDU3gdeaFu2Xu0n0EvelfHDGuqtNIn5RO7yQj4H1TqNdBc/yZjxnWA0PVB8D3Woyp0i5B43JwQ6Vw==
   dependencies:
     ignore-walk "^3.0.1"
     npm-bundled "^1.0.1"
@@ -7853,9 +7853,9 @@ react-scripts-ts@^2.16.0:
     fsevents "^1.1.3"
 
 react-storage-hook@^1.0.2:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/react-storage-hook/-/react-storage-hook-1.0.4.tgz#444f35d15a9e7a736cf2ce431477862d066d9b1d"
-  integrity sha512-PKlUN9zv2De+50ja0S/B/cGOLClrUZ1qsp5E21088fnkh686u2Ni4zTrG2U1wP/o70fis/ShCBww5MXXOD8bvw==
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/react-storage-hook/-/react-storage-hook-1.0.5.tgz#67f6b361167913bf0f6dcd133382b46f23dd7240"
+  integrity sha512-YDGNlg3ghbMAXg2rXjANQdqGD95buT6k+/MhGly2/G9z2KhhQLErQUooi7piuKVK0ut4N+WLTs00MzmGfKQ45g==
 
 react@^16.4.1:
   version "16.8.6"
