@@ -230,8 +230,7 @@ const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split
 /**
  * @hidden
  */
-const OAuthCallbackHandler: React.FunctionComponent<{}> = () => {
-  const [state] = useStorage(oauthStateName)
+const OAuthCallbackHandler: React.FunctionComponent<{}> = ({ children }) => {
   const { target } = JSON.parse(state)
   const [ /* token */, setToken ] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
@@ -254,7 +253,7 @@ const OAuthCallbackHandler: React.FunctionComponent<{}> = () => {
     window.close()
   }, [])
 
-  return <React.Fragment>'please wait...'</React.Fragment>
+  return <React.Fragment>{children || "please wait..."}</React.Fragment>
 }
 
 /**
@@ -278,11 +277,12 @@ export const OAuthCallback: React.FunctionComponent<{
    * When set to true, errors are thrown
    * instead of just closing the window.
    */
-  errorBoundary = true
+  errorBoundary = true,
+  children
 }) => {
-  if (errorBoundary === false) return <OAuthCallbackHandler />
+  if (errorBoundary === false) return <OAuthCallbackHandler>{children}</OAuthCallbackHandler>
   return <ClosingErrorBoundary>
-    <OAuthCallbackHandler />
+    <OAuthCallbackHandler>{children}</OAuthCallbackHandler>
   </ClosingErrorBoundary>
 }
 
