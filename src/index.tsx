@@ -221,7 +221,9 @@ export const ErrNoAccessToken = new Error('no access_token')
  */
 const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split('&').map<[string,string]>(
   (param: string): [string,string] => {
-    const [k, v] = param.split('=').map(decodeURIComponent)
+    const sepIndex = param.indexOf("=")
+    const k = decodeURIComponent(param.slice(0, sepIndex))
+    const v = decodeURIComponent(param.slice(sepIndex + 1))
     return [k, v]
   }))
 
