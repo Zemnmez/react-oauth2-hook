@@ -24,6 +24,25 @@ const storagePrefix = 'react-oauth2-hook'
  */
 const oauthStateName = storagePrefix + '-state-token-challenge'
 
+export interface Options {
+  /**
+   * The OAuth authorize URL to retrieve the token from.
+   */
+  authorizeUrl: string;
+  /**
+   * The OAuth scopes to request.
+   */
+  scope?: string[];
+  /**
+   * The OAuth `redirect_uri` callback.
+   */
+  redirectUri: string;
+  /**
+   * The OAuth `client_id` corresponding to the requesting client.
+   */
+  clientID: string;
+}
+
 /**
  * useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
  *
@@ -111,12 +130,7 @@ export const useOAuth2Token = ({
    * requesting client.
    */
   clientID
-}: {
-  authorizeUrl: string
-  scope: string[],
-  redirectUri: string,
-  clientID: string
-}): [
+}: Options): [
   OAuthToken | undefined,
   getToken,
   setToken
@@ -125,11 +139,11 @@ export const useOAuth2Token = ({
     authorizeUrl, scope, clientID
   }
 
-  const [token, setToken]: [OAuthToken | undefined, (newValue: string) => void] = useStorage(
+  const [token, setToken] = useStorage<string>(
     storagePrefix + '-' + JSON.stringify(target)
   )
 
-  let [state, setState] = useStorage(
+  let [state, setState] = useStorage<string>(
     oauthStateName
   )
 
@@ -221,15 +235,17 @@ export const ErrNoAccessToken = new Error('no access_token')
  */
 const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split('&').map<[string,string]>(
   (param: string): [string,string] => {
-    const [k, v] = param.split('=').map(decodeURIComponent)
+    const sepIndex = param.indexOf("=")
+    const k = decodeURIComponent(param.slice(0, sepIndex))
+    const v = decodeURIComponent(param.slice(sepIndex + 1))
     return [k, v]
   }))
 
 /**
  * @hidden
  */
-const OAuthCallbackHandler: React.FunctionComponent<{}> = () => {
-  const [state] = useStorage(oauthStateName)
+const OAuthCallbackHandler: React.FunctionComponent<{}> = ({ children }) => {
+  const [state] = useStorage<string>(oauthStateName)
   const { target } = JSON.parse(state)
   const [ /* token */, setToken ] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
@@ -252,7 +268,7 @@ const OAuthCallbackHandler: React.FunctionComponent<{}> = () => {
     window.close()
   }, [])
 
-  return <React.Fragment>'please wait...'</React.Fragment>
+  return <React.Fragment>{children || "please wait..."}</React.Fragment>
 }
 
 /**
@@ -276,11 +292,12 @@ export const OAuthCallback: React.FunctionComponent<{
    * When set to true, errors are thrown
    * instead of just closing the window.
    */
-  errorBoundary = true
+  errorBoundary = true,
+  children
 }) => {
-  if (errorBoundary === false) return <OAuthCallbackHandler />
+  if (errorBoundary === false) return <OAuthCallbackHandler>{children}</OAuthCallbackHandler>
   return <ClosingErrorBoundary>
-    <OAuthCallbackHandler />
+    <OAuthCallbackHandler>{children}</OAuthCallbackHandler>
   </ClosingErrorBoundary>
 }
 
@@ -292,17 +309,19 @@ OAuthCallback.propTypes = {
  * @hidden
  */
 class ClosingErrorBoundary extends React.PureComponent {
+  state = { errored: false }
+
   static getDerivedStateFromError(error: string) {
     console.log(error)
     // window.close()
+    return { errored: true }
   }
-
 
   static propTypes = {
     children: PropTypes.func.isRequired
   }
 
-  render() { return this.props.children }
+  render() { return this.state.errored ? null : this.props.children }
 }
 
 
