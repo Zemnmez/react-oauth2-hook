@@ -294,17 +294,19 @@ OAuthCallback.propTypes = {
  * @hidden
  */
 class ClosingErrorBoundary extends React.PureComponent {
+  state = { errored: false }
+
   static getDerivedStateFromError(error: string) {
     console.log(error)
     // window.close()
+    return { errored: true }
   }
-
 
   static propTypes = {
     children: PropTypes.func.isRequired
   }
 
-  render() { return this.props.children }
+  render() { return this.state.errored ? null : this.props.children }
 }
 
 
