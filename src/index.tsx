@@ -24,6 +24,25 @@ const storagePrefix = 'react-oauth2-hook'
  */
 const oauthStateName = storagePrefix + '-state-token-challenge'
 
+export interface Options {
+  /**
+   * The OAuth authorize URL to retrieve the token from.
+   */
+  authorizeUrl: string;
+  /**
+   * The OAuth scopes to request.
+   */
+  scope?: string[];
+  /**
+   * The OAuth `redirect_uri` callback.
+   */
+  redirectUri: string;
+  /**
+   * The OAuth `client_id` corresponding to the requesting client.
+   */
+  clientID: string;
+}
+
 /**
  * useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
  *
@@ -111,12 +130,7 @@ export const useOAuth2Token = ({
    * requesting client.
    */
   clientID
-}: {
-  authorizeUrl: string
-  scope: string[],
-  redirectUri: string,
-  clientID: string
-}): [
+}: Options): [
   OAuthToken | undefined,
   getToken,
   setToken
@@ -125,11 +139,11 @@ export const useOAuth2Token = ({
     authorizeUrl, scope, clientID
   }
 
-  const [token, setToken]: [OAuthToken | undefined, (newValue: string) => void] = useStorage(
+  const [token, setToken] = useStorage<string>(
     storagePrefix + '-' + JSON.stringify(target)
   )
 
-  let [state, setState] = useStorage(
+  let [state, setState] = useStorage<string>(
     oauthStateName
   )
 
@@ -231,6 +245,7 @@ const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split
  * @hidden
  */
 const OAuthCallbackHandler: React.FunctionComponent<{}> = ({ children }) => {
+  const [state] = useStorage<string>(oauthStateName)
   const { target } = JSON.parse(state)
   const [ /* token */, setToken ] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
