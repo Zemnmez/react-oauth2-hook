@@ -18,7 +18,7 @@ export const oauthStateName = storagePrefix + '-state-token-challenge'
 /**
  * Options to useOauth2Token.
  */
-export interface Options {
+export interface Config {
   /**
    * The OAuth authorize URL to retrieve the token from.
    */
@@ -40,32 +40,41 @@ export interface Options {
   clientID: string;
 }
 
+type AuthorizeUrlConfig = Config & {
+  state: string
+}
+
+const authorizeUrl = ({
+  authorizeUrl,
+  scope,
+  redirectUri,
+  clientID,
+  state
+}: AuthorizeUrlConfig): string =>
+  `${authorizeUrl}?${urlEncode({
+    scope: scope?.join(","),
+    redirectUri,
+    clientID,
+    state
+  })}`;
+
+const urlEncode = (o: Record<string,string | undefined>): string =>
+  Object.entries(o)
+    .filter((val): val is [string, string] =>
+      val.every(v=> v !== undefined))
+
+    .map(([k, v]) =>
+      [k, v].map(encodeURIComponent).join("=")).join("&");
+
 /**
  * useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
  */
 export const useOAuth2Token = ({
-  /**
-   * The OAuth authorize URL to retrieve the token
-   * from.
-   */
   authorizeUrl,
-
-  /**
-   * The OAuth scopes to request.
-   */
   scope = [],
-
-  /**
-   * The OAuth `redirect_uri` callback.
-   */
   redirectUri,
-
-  /**
-   * The OAuth `client_id` corresponding to the
-   * requesting client.
-   */
   clientID
-}: Options): [
+}: Config): [
   OAuthToken | undefined,
   getToken,
   setToken
@@ -132,25 +141,7 @@ const cryptoRandomString = () => {
 }
 
 
-const OAuth2AuthorizeURL = ({
-  scope,
-  clientID,
-  state,
-  authorizeUrl,
-  redirectUri
-}: {
-  scope: string[],
-  clientID: string,
-  state: string,
-  authorizeUrl: string,
-  redirectUri: string
-}) => `${authorizeUrl}?${Object.entries({
-  scope: scope.join(','),
-  client_id: clientID,
-  state,
-  redirect_uri: redirectUri,
-  response_type: 'token'
-}).map(([k, v]) => [k, v].map(encodeURIComponent).join('=')).join('&')}`
+
 
 /**
  * This error is thrown by the OAuthCallback
@@ -164,6 +155,14 @@ export const ErrIncorrectStateToken = new Error('incorrect state token')
  */
 export const ErrNoAccessToken = new Error('no access_token')
 
+export type State = {
+  nonce: string,
+  target: Config
+}
+
+const wrapState = (s: State): string => JSON.stringify(s);
+const unwrapState = (s: string): State => JSON.parse(s);
+
 const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split('&').map<[string,string]>(
   (param: string): [string,string] => {
     const sepIndex = param.indexOf("=")
@@ -172,8 +171,14 @@ const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split
     return [k, v]
   }))
 
-const OAuthCallbackHandler: React.FunctionComponent<{}> = ({ children }) => {
-  const [state] = useStorage<string>(oauthStateName)
+  /**
+   * useOAuthCallback is a React hook used
+   * to handle an OAuth2 callback. It should
+   * be rendered on the application's redirect_uri.
+   */
+const useOAuthCallback = () => {
+  const [state] = useStorage<string>(oauthStateName);
+
   const { target } = JSON.parse(state)
   const [ /* token */, setToken ] = useStorage(
     storagePrefix + '-' + JSON.stringify(target)
@@ -195,8 +200,6 @@ const OAuthCallbackHandler: React.FunctionComponent<{}> = ({ children }) => {
     setToken(token)
     window.close()
   }, [])
-
-  return <React.Fragment>{children || "please wait..."}</React.Fragment>
 }
 
 /**
