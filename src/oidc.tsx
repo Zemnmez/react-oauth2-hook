@@ -127,7 +127,7 @@ export const enum OidcError {
  * The parameters of an OIDC implicit grant request.
  * @see https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
  */
-export type OIDCImplicitRequest = Omit<
+export type OidcImplicitRequest = Omit<
     OAuthImplicitRequest,
     'scope' | 'response_type'
 > &{

@@ -8,7 +8,7 @@
 */
 
 
-export const enum oauthError {
+export const enum OAuthError {
     /**
      * The request is missing a required parameter, includes
      * an invalid parameter value, includes a parameter more
@@ -69,3 +69,8 @@ export type OAuthImplicitRequest = {
     scope?: Array<string>,
     state?: string
 }
+
+/**
+ * An OAuth 2.0 token string.
+ */
+export type OAuthToken = string;
