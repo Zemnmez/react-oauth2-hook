@@ -13,7 +13,10 @@
   "scripts": {
     "build": "yarn make build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/json-stable-stringify": "^1.0.32",
+    "json-stable-stringify": "^1.0.1"
+  },
   "peerDependencies": {
     "immutable": "^4.0.0-rc.12",
     "react": "^15.0.0 || ^16.0.0",

@@ -1,3 +1,4 @@
+import { filterUndefinedFromObject } from './util'
 /*
     This file contains types describing OAuth 2.0
     primitives. These types are higher level than
@@ -68,6 +69,30 @@ export type OAuthImplicitRequest = {
     redirect_uri?: URL,
     scope?: Array<string>,
     state?: string
+}
+
+/**
+ * OAuthImplicitRequestParams constructs the concrete query
+ * parameters for an OAuth 2.0 implicit grant request.
+ * @param rq The OAuth 2.0 implicit request parameters
+ * @returns query parameters as URLSearchParams
+ */
+export const OAuthImplicitRequestParams = (rq: OAuthImplicitRequest):
+    URLSearchParams => {
+
+    type paramsT = {
+        [k in keyof OAuthImplicitRequest]: string | undefined
+    }
+
+    const params: paramsT = {
+        ...rq,
+        redirect_uri: rq.redirect_uri?.toString(),
+        scope: rq.scope?.join(",")
+    }
+
+    return new URLSearchParams(
+        filterUndefinedFromObject<string,string | undefined>(params)
+    );
 }
 
 /**

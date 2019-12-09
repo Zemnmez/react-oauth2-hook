@@ -1,5 +1,6 @@
-import { OAuthImplicitRequest } from "./oauth2";
+import { OAuthImplicitRequest } from "./oauth";
 import { BCP47LanguageTag } from "./BCP47";
+import { filterUndefinedFromObject } from './util';
 
 /*
     This file contains types describing OIDC 1.0
@@ -127,7 +128,7 @@ export const enum OidcError {
  * The parameters of an OIDC implicit grant request.
  * @see https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
  */
-export type OidcImplicitRequest = Omit<
+export type OidcImplicitRequestParams = Omit<
     OAuthImplicitRequest,
     'scope' | 'response_type'
 > &{
@@ -135,7 +136,7 @@ export type OidcImplicitRequest = Omit<
      * OAuth scopes. 'openid' will be added if it
      * is not already a scope.
      */
-    scope: Array<string>,
+    scope?: Array<string>,
 
     /**
      * Expected response type. id_token for just
@@ -147,7 +148,7 @@ export type OidcImplicitRequest = Omit<
     /**
      * Single-use token to prevent replay.
      */
-    nonce: string,
+    nonce?: string,
 
     /**
      * The configured redirect_uri for the client_id.
@@ -185,7 +186,7 @@ export type OidcImplicitRequest = Omit<
      * the locale to render the ui for, in order
      * of preference.
      */
-    ui_locales?: Array<BCP47LanguageTag>,
+    ui_locales?: Array<BCP47LanguageTag | string>,
 
     /**
      * An id_token previously issued by this Authorization
@@ -195,7 +196,7 @@ export type OidcImplicitRequest = Omit<
      * If the user specified by this token cannot be logged in
      * it is an error.
      */
-    id_token_hint?: OidcIdToken,
+    id_token_hint?: string,
 
     /**
      * A string identifying a specific account which can 
@@ -217,7 +218,42 @@ export type OidcImplicitRequest = Omit<
      * returned in the final ID Token.
      * @see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter
      */
-    claims: OidcClaimsRequest
+    claims?: OidcClaimsRequest
+}
+
+export type OidcImplicitRequestConfig = OidcImplicitRequestParams & {
+    /**
+     * The URL of the Authorization Endpoint.
+     * @example "https://api.twitch.tv/oauth/authorize"
+     * @see https://tools.ietf.org/html/rfc6749#section-3.1
+     */
+    authUrl: URL
+}
+
+
+/**
+ * OIDCImplicitRequestParams constructs the concrete query parameters
+ * for an OIDC Implicit request.
+ * @param rq The OIDC Implicit Request parameters
+ * @returns query parameters as URLSearchParams
+ */
+export const MakeOidcImplicitRequestParams = (rq: OidcImplicitRequestParams): URLSearchParams => {
+    type paramsT = {
+        [k in keyof OidcImplicitRequestParams]:
+            string | undefined
+    };
+
+    const params: paramsT = {
+        ...rq,
+        redirect_uri: rq.redirect_uri.toString(),
+        scope: rq.scope?.join(","),
+        max_age: rq.max_age?.toString(),
+        ui_locales: rq.ui_locales?.join(" "),
+        claims: rq.claims? JSON.stringify(rq.claims): void 0,
+    }
+    return new URLSearchParams(
+        filterUndefinedFromObject<string,string | undefined>(params)
+    );
 }
 
 /**
