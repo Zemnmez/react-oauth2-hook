@@ -306,7 +306,7 @@ export type OidcIdToken = {
      * The issuer of this ID Token.
      * A case-sensitive URL.
      */
-    iss: URL & { scheme: "https:" }
+    iss: Readonly<URL & { scheme: "https:" }>
 
     /**
      * The audience (client_id) this token is intended

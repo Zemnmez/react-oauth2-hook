@@ -11,7 +11,7 @@ import {
     OidcImplicitRequestParams
 } from './oidc'
 import {
-    OAuthToken, 
+    OAuthToken, OAuthResponseType, 
 } from './oauth';
 
 const cryptoRandomString = () => {
@@ -29,45 +29,6 @@ type StateToken<request> = {
     request: request;
 }
 
-/**
- * useStateToken generates a unique state token
- * for the given request, and stores it in expiring
- * localStorage.
- * @param request the request object the state token correlates to
- */
-const useNewStateToken = <request>(request: request):
-    [StateToken<request>] => {
-
-    const stateToken = {
-        entropy: cryptoRandomString(),
-        request: request
-    }
-
-    const [, setStateToken] = useExpiringStorage<true>(
-        `[${statePrefix}] ${JSON.stringify(request)})`,
-        { expiresAfterMilliseconds: 1000 * 60 * 60 * 2}
-    )
-
-    setStateToken(true);
-    return [stateToken];
-}
-
-/**
- * useVerifyStateToken verifies a state token
- * is valid, and returns the request it is for.
- * @param token the state token to verify
- */
-const useVerifyStateToken = <request>(token: StateToken<request>):
-    [true, request] | [undefined | false, undefined] => {
-    const [isValid] = useExpiringStorage<boolean>(
-        `[${statePrefix}] ${JSON.stringify(token.request)})`,
-        { expiresAfterMilliseconds: 1000 * 60 * 60 * 2}
-    )
-
-    if (!isValid) return [isValid, undefined];
-    return [isValid, token.request];
-}
-
 type useAuthTokenResponse = {
     /**
      * Who the user is.
@@ -80,9 +41,10 @@ type useAuthTokenResponse = {
     token: OAuthToken,
 
     /**
-     * Call to get new tokens.
+     * Returns an authentication URL that can be used
+     * to get new tokens.
      */
-    refresh: (overrides: Partial<authTokenConfig>) => void
+    newTokens: () => URL
 }
 
 type authTokenConfig =
@@ -108,6 +70,13 @@ export type useAuthTokenOptions = {
     expiresAfterMilliseconds?: number
 }
 
+const useStateToken = (r: authKeyObject) => 
+    useExpiringStorage<{ entropy: string}>(
+        `[${statePrefix}] ${stableStringify(r)}`,
+        { expiresAfterMilliseconds: 100 * 60 * 60 * 2}
+    );
+
+
 export const useAuthToken = (rq: authTokenConfig, {
     expiresAfterMilliseconds
 }: useAuthTokenOptions):
@@ -120,28 +89,43 @@ export const useAuthToken = (rq: authTokenConfig, {
     }
 
     type tokens = {
-        oidc: string;
+        who: string;
         token: string;
     }
 
-    const [tokens, setTokens] = useExpiringStorage<tokens>(
+    const [tokens] = useExpiringStorage<tokens>(
         authKey(authKeyObject), {
             expiresAfterMilliseconds
         });
+    
+    const { who, token } = tokens ?? {};
 
-    const getNewToken = () => {
-        const [stateToken] = useNewStateToken(authKey);
+    const [, setStateToken] = useStateToken(authKeyObject);
 
-        const requestParams: OidcImplicitRequestParams = {
-            ...authKeyObject,
-            state: stableStringify(stateToken)
-        }
+    const getAuthUrl = () => {
+        const entropy = cryptoRandomString();
+
+        setStateToken({entropy});
 
         // if theres a way to do this without reparsing
         // or modifying the incoming object id love to know
         const url = new URL(rq.authUrl.toString());
         url.search =
-            MakeOidcImplicitRequestParams(requestParams).toString();
+            MakeOidcImplicitRequestParams({
+                ...rq,
+                response_type: 'id_token token',
+                state: stableStringify({
+                    ...rq,
+                    entropy
+                } as (typeof rq & { entropy: string }))
+            }).toString();
+        return Object.freeze(url)
+    }
+
+    return {
+        who,
+        token,
+        newTokens: getAuthUrl
     }
 }
 
