@@ -11,9 +11,15 @@ export const fromEntries = <K extends string | number | symbol,V>(entries: Itera
  * Filters undefined key/value pairs from a Record object.
  * @param o a Record object to filter undefined values from
  */
-export const filterUndefinedFromObject = <K extends string,V>(o: Record<K,V>): Record<K, NonNullable<V>> => 
+export const omitEmpty = <K extends string,V>(o: Record<K,V>): Record<K, NonNullable<V>> => 
     fromEntries(Object.entries(o)
         .filter(
             (kv): kv is [K, NonNullable<V>] =>
                 kv[1] !== undefined && kv[1] !== null
         ))
+
+export type KnownKeys<T> = {
+  [K in keyof T]: string extends K ? never : number extends K ? never : K
+} extends { [_ in keyof T]: infer U } ? U : never;
+
+export type RequiredOnly<T extends Record<any,any>> = Pick<T, KnownKeys<T>>;

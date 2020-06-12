@@ -1,114 +1,52 @@
 import * as React from 'react'
-import { useStorage } from 'react-storage-hook'
-import { Map } from 'immutable'
-
-/**
- * storagePrefix is prepended to all localStorage
- * keys used by react-oauth2-hook
- */
-export const storagePrefix = 'react-oauth2-hook'
-
-/**
- * oauthStateName is the key name prepended to all
- * OAuth states stored by react-oauth2-hook
- */
-export const oauthStateName = storagePrefix + '-state-token-challenge'
-
-
-/**
- * Options to useOauth2Token.
- */
-export interface Config {
-  /**
-   * The OAuth authorize URL to retrieve the token from.
-   */
-  authorizeUrl: string;
-
-  /**
-   * The OAuth scopes to request.
-   */
-  scope?: string[];
-
-  /**
-   * The OAuth `redirect_uri` callback.
-   */
-  redirectUri: string;
-
-  /**
-   * The OAuth `client_id` corresponding to the requesting client.
-   */
-  clientID: string;
-}
-
-type AuthorizeUrlConfig = Config & {
-  state: string
-}
-
-const authorizeUrl = ({
-  authorizeUrl,
-  scope,
-  redirectUri,
-  clientID,
-  state
-}: AuthorizeUrlConfig): string =>
-  `${authorizeUrl}?${urlEncode({
-    scope: scope?.join(","),
-    redirectUri,
-    clientID,
-    state
-  })}`;
-
-const urlEncode = (o: Record<string,string | undefined>): string =>
-  Object.entries(o)
-    .filter((val): val is [string, string] =>
-      val.every(v=> v !== undefined))
-
-    .map(([k, v]) =>
-      [k, v].map(encodeURIComponent).join("=")).join("&");
+import * as oauth from './proto/oauth';
+import * as statetoken from './statetoken';
+import * as storagekey from './storagekey';
+import { useStorage } from 'react-storage-hook';
 
 /**
  * useOAuth2Token is a React hook providing an OAuth2 implicit grant token.
  */
-export const useOAuth2Token = ({
-  authorizeUrl,
-  scope = [],
-  redirectUri,
-  clientID
-}: Config): [
+export const useOAuth2Token = (config: Config): [
   OAuthToken | undefined,
   getToken,
   setToken
 ] => {
-  const target = {
-    authorizeUrl, scope, clientID
-  }
-
   // storage for an OAuth token
   const [token, setToken] = useStorage<string>(
-    storagePrefix + '-' + JSON.stringify(target)
-  )
+    storagekey.
+  );
+
+  const keyString = storagekey.OAuth2Token(config);
 
   // storage for state callbacks
-  const [/* state */, setState] = useStorage<string>(
-    oauthStateName
+  const [/* state */, setStateChallenge] = useStorage<string>(
+    keyString
   )
 
   const getToken = React.useCallback(() => {
-    const state = JSON.stringify({
-      nonce: cryptoRandomString(),
-      target
-    })
+    const { token: stateToken, key: challenge } =
+      statetoken.Pack(keyString);
+      
+    setStateChallenge(challenge);
 
-    setState(state);
+    const target = new URL(config.authorizeUrl.toString());
+    const params: oauth.ImplicitRequestParams = {
+      response_type: "token",
+      client_id: config.clientID,
+      redirect_uri: config.redirectUri.toString(),
+      ...config.scope?{scope: oauth.ScopesString(config.scope)}:{},
+      state: stateToken,
+    };
 
-    window.open(OAuth2AuthorizeURL({
-      scope,
-      clientID,
-      authorizeUrl,
-      state,
-      redirectUri
-    }))
-  }, [setState])
+    const p_assert: typeof params & {
+      [key: string]: any
+    } = params
+
+    target.search = new URLSearchParams(p_assert).toString()
+
+    window.open(target.toString())
+  }, [ setStateChallenge ])
 
   return [token, getToken, setToken]
 }
@@ -132,17 +70,6 @@ export type getToken = () => void
  */
 export type setToken = (newValue: OAuthToken | undefined) => void
 
-
-const cryptoRandomString = () => {
-  const entropy = new Uint32Array(10)
-  window.crypto.getRandomValues(entropy)
-
-  return window.btoa([...entropy].join(','))
-}
-
-
-
-
 /**
  * This error is thrown by the OAuthCallback
  * when the state token recieved is incorrect or does not exist.
@@ -160,29 +87,28 @@ export type State = {
   target: Config
 }
 
-const wrapState = (s: State): string => JSON.stringify(s);
-const unwrapState = (s: string): State => JSON.parse(s);
-
-const urlDecode = (urlString: string): Map<string,string> => Map(urlString.split('&').map<[string,string]>(
-  (param: string): [string,string] => {
-    const sepIndex = param.indexOf("=")
-    const k = decodeURIComponent(param.slice(0, sepIndex))
-    const v = decodeURIComponent(param.slice(sepIndex + 1))
-    return [k, v]
-  }))
-
-  /**
-   * useOAuthCallback is a React hook used
-   * to handle an OAuth2 callback. It should
-   * be rendered on the application's redirect_uri.
-   */
+/**
+ * useOAuthCallback is a React hook used
+ * to handle an OAuth2 callback. It should
+ * be rendered on the application's redirect_uri.
+ */
 const useOAuthCallback = () => {
-  const [state] = useStorage<string>(oauthStateName);
+  const [challenge = "" as statetoken.Key] = useStorage<statetoken.Key>(storageprefix.stateChallenge);
 
-  const { target } = JSON.parse(state)
-  const [ /* token */, setToken ] = useStorage(
-    storagePrefix + '-' + JSON.stringify(target)
+  const requestParams = React.useMemo(() =>
+    oauth.ParseRequestParams(new URL(location.href).searchParams)
+  , [location.href]);
+
+  const { scope = "" } = requestParams;
+
+  const rsp = statetoken.Unpack(scope as statetoken.Token, challenge)
+  const error = rsp instanceof Error? rsp: undefined;
+
+  const [ /* */, setToken ] = useStorage(
+    storageprefix.oauth2Token + '-' + scope
   )
+
+
 
   console.log('rendering OAuthCallbackHandler')
 

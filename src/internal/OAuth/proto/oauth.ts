@@ -1,6 +1,6 @@
-import { filterUndefinedFromObject } from './util'
+import * as util from './util';
 /*
-    This file contains types describing OAuth 2.0
+    This file contains types describing  2.0
     primitives. These types are higher level than
     they might otherwise be: for example, 'scope'
     is a comma separated string, but is represented
@@ -9,7 +9,7 @@ import { filterUndefinedFromObject } from './util'
 */
 
 
-export const enum OAuthError {
+export const enum Error {
     /**
      * The request is missing a required parameter, includes
      * an invalid parameter value, includes a parameter more
@@ -44,7 +44,7 @@ export const enum OAuthError {
      * The Authorization server encountered an unexpected
      * condition that prevented it from fulfilling the request.
      * 
-     * (this is in essence HTTP 500, except OAuth cannot return this)
+     * (this is in essence HTTP 500, except  cannot return this)
      */
     server_error = "server_error",
 
@@ -54,48 +54,66 @@ export const enum OAuthError {
     temporarily_unavailable = "temporarily_unavailable"
 }
 
-export const enum OAuthResponseType {
-    code = "code",
-    token = "token"
-}
+export type ResponseType = "code" | "token"
 
-/**
- * The parameters of an OAuth 2.0 implicit grant request.
- * @see https://tools.ietf.org/html/rfc6749#section-4.2.1
- */
-export type OAuthImplicitRequest = {
-    response_type: OAuthResponseType.token,
-    client_id: string,
-    redirect_uri?: URL,
-    scope?: Array<string>,
+export interface AuthorizationRequestParams {
+    response_type: ResponseType,
+    client_id: ClientID,
+    redirect_uri?: string,
+    scope?: ScopesString,
     state?: string
 }
 
+export const ParseRequestParams:
+    (u: URLSearchParams) => Partial<AuthorizationRequestParams> & {
+        [key: string]: string
+    }
+=
+    u => util.fromEntries(u) as any;
+;
+
 /**
- * OAuthImplicitRequestParams constructs the concrete query
- * parameters for an OAuth 2.0 implicit grant request.
- * @param rq The OAuth 2.0 implicit request parameters
- * @returns query parameters as URLSearchParams
+ * The parameters of an  2.0 implicit grant request.
+ * @see https://tools.ietf.org/html/rfc6749#section-4.2.1
  */
-export const OAuthImplicitRequestParams = (rq: OAuthImplicitRequest):
-    URLSearchParams => {
-
-    type paramsT = {
-        [k in keyof OAuthImplicitRequest]: string | undefined
-    }
-
-    const params: paramsT = {
-        ...rq,
-        redirect_uri: rq.redirect_uri?.toString(),
-        scope: rq.scope?.join(",")
-    }
-
-    return new URLSearchParams(
-        filterUndefinedFromObject<string,string | undefined>(params)
-    );
+export interface ImplicitRequestParams extends AuthorizationRequestParams {
+    response_type: "token"
 }
 
+export type RedirectURI = URL & {
+    __redirectURIBrand: 'redirecturi'
+};
+
+export const RedirectURIString:
+    (r: RedirectURI) => RedirectURIString
+=
+    r => r.toString() as RedirectURIString
+;
+
+export type RedirectURIString = string & {
+    __RedirectURIStringBrand: 'redirecturi'
+};
+
+export type Scopes = string[];
+export type ScopesString = string & {
+    __ScopesStringBrand: 'scopesstring'
+};
+
+export const ScopesString:
+    (s: Scopes) => ScopesString
+=
+    s => s.join(",") as ScopesString
+;
+
+export type ClientID = string & {
+    __ClientIDBrand: 'clientid'
+};
+
+export type AuthorizeURL = URL & {
+    __AuthorizeURLBrand: 'authorizeurl'
+};
+
 /**
- * An OAuth 2.0 token string.
+ * An  2.0 token string.
  */
-export type OAuthToken = string;
+export type Token = string;

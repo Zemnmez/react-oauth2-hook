@@ -11,7 +11,8 @@
     "npm": ">=5"
   },
   "scripts": {
-    "build": "yarn make build"
+    "build": "yarn make build",
+    "test": "yarn jest --coverage"
   },
   "dependencies": {
     "@types/json-stable-stringify": "^1.0.32",
@@ -23,12 +24,15 @@
     "react-storage-hook": "^1.0.2"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.0",
     "@types/react": "^16.3.13",
     "cross-env": "^5.1.4",
     "gh-pages": "^1.2.0",
     "immutable": "^4.0.0-rc.12",
+    "jest": "^26.0.1",
     "react": "^16.4.1",
     "react-storage-hook": "^2.0.1",
+    "ts-jest": "^26.1.0",
     "typescript": "^3.7.3"
   },
   "files": [
